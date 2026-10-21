@@ -36,11 +36,11 @@ Members and garages are saved in Cloudflare KV, a simple key-value store.
 npx wrangler kv namespace create CLUB_KV
 ```
 
-The command prints a block containing `"id": "abcd1234..."`. Open `wrangler.jsonc`, find `REPLACE_WITH_YOUR_KV_NAMESPACE_ID` and paste that id in its place.
+The command prints a block containing `"id": "abcd1234..."`. Open `wrangler.jsonc` and paste that id over the existing `id` under `kv_namespaces`. (The club's own account already has `the-super-car-club-CLUB_KV`, and its id is in the file.)
 
 ## 4. Choose your address
 
-Your site will live at `https://supercar-club-dashboard.<your-subdomain>.workers.dev`. Your subdomain is shown in the Cloudflare dashboard under Workers & Pages. If you have your own domain, use that instead.
+Your site will live at `https://the-super-car-club.<your-subdomain>.workers.dev`. Your subdomain is shown in the Cloudflare dashboard under Workers & Pages. If you have your own domain, use that instead.
 
 Open `wrangler.jsonc` and set `APP_URL` to the full address with no slash at the end. The sign-in buttons need this to be exact.
 
@@ -100,7 +100,7 @@ The members list at `/admin` is only shown to people Cloudflare Access has let i
 
 1. In the Cloudflare dashboard open Zero Trust. The first time, pick a team name; this becomes your team domain, `<team>.cloudflareaccess.com`.
 2. Go to Access, then Applications, then Add an application, then Self-hosted.
-3. Give it a name such as "SuperCar Club admin". Add a public hostname: your Worker's hostname (for example `supercar-club-dashboard.<your-subdomain>.workers.dev`) with the path `admin`. Add a second entry with path `admin/*`.
+3. Give it a name such as "SuperCar Club admin". Add a public hostname: your Worker's hostname (for example `the-super-car-club.<your-subdomain>.workers.dev`) with the path `admin`. Add a second entry with path `admin/*`.
 4. Add a policy: Action Allow, and include the email addresses of the people who may see the member list.
 5. Save. Open the application again and copy the Application Audience (AUD) tag.
 6. Save the two values as secrets:
