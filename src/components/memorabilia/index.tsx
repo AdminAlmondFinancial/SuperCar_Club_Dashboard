@@ -74,7 +74,7 @@ export function Tachometer({ className }: MemorabiliaProps) {
         y={y}
         fill="currentColor"
         stroke="none"
-        fontFamily="Archivo, sans-serif"
+        fontFamily="'Instrument Sans Variable', sans-serif"
         fontSize={11}
         textAnchor="middle"
         dominantBaseline="central"
@@ -289,7 +289,7 @@ export function RaceNumber({ className, number = 7 }: MemorabiliaProps & { numbe
         y={101}
         fill="currentColor"
         stroke="none"
-        fontFamily="'Bodoni Moda', serif"
+        fontFamily="'Instrument Serif', serif"
         fontSize={size}
         textAnchor="middle"
         dominantBaseline="central"

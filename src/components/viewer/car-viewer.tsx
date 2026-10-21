@@ -84,13 +84,14 @@ function Studio({ floor = true }: { floor?: boolean }) {
   return (
     <>
       <Environment resolution={256} frames={1}>
-        <Lightformer form="rect" intensity={1.6} color="#ffffff" scale={[10, 2, 1]} position={[0, 5, 0]} rotation-x={Math.PI / 2} />
-        <Lightformer form="rect" intensity={2} color="#ffffff" scale={[10, 1, 1]} position={[0, 5, -3]} rotation-x={Math.PI / 2} />
-        <Lightformer form="rect" intensity={2} color="#ffffff" scale={[10, 1, 1]} position={[0, 5, 3]} rotation-x={Math.PI / 2} />
+        {/* Thin overhead strips draw clean highlight lines along the bonnet instead of washing it white */}
+        <Lightformer form="rect" intensity={1.2} color="#ffffff" scale={[10, 0.35, 1]} position={[0, 5, 0]} rotation-x={Math.PI / 2} />
+        <Lightformer form="rect" intensity={1.4} color="#ffffff" scale={[10, 0.25, 1]} position={[0, 5, -2.5]} rotation-x={Math.PI / 2} />
+        <Lightformer form="rect" intensity={1.4} color="#ffffff" scale={[10, 0.25, 1]} position={[0, 5, 2.5]} rotation-x={Math.PI / 2} />
         <Lightformer form="rect" intensity={1.1} color="#d9f2ec" scale={[3, 5, 1]} position={[-7, 2, 0]} rotation-y={Math.PI / 2} />
         <Lightformer form="rect" intensity={3} color="#fff3dd" scale={[4, 8, 1]} position={[7, 2, 0]} rotation-y={-Math.PI / 2} />
         <Lightformer form="ring" intensity={1.2} color="#3a9b8a" scale={4} position={[0, 3, 8]} />
-        <Lightformer form="rect" intensity={4} color="#cfe9e3" scale={[14, 2.5, 1]} position={[0, 1.5, -9]} />
+        <Lightformer form="rect" intensity={1.6} color="#cfe9e3" scale={[14, 0.6, 1]} position={[0, 2.2, -9]} />
         <Lightformer form="rect" intensity={3} color="#ffffff" scale={[2, 6, 1]} position={[-9, 1.5, 5]} rotation-y={Math.PI / 3} />
         <Lightformer form="rect" intensity={1.1} color="#ffffff" scale={[8, 1.5, 1]} position={[0, 1.2, 9]} />
       </Environment>

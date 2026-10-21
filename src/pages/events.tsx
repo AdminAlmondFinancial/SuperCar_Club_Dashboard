@@ -44,7 +44,7 @@ export function EventsPage() {
   return (
     <div className="relative overflow-hidden">
       <ChequeredFlag className="pointer-events-none absolute -right-10 top-16 size-72 rotate-6 text-champagne/10 md:right-8 md:size-[26rem]" />
-      <div className="relative mx-auto max-w-[1100px] px-4 pb-28 pt-28 md:px-8 md:pb-24">
+      <div className="relative mx-auto max-w-[1280px] px-4 pb-28 pt-28 md:px-8 md:pb-24">
         <h1 className="type-display text-5xl md:text-7xl">Events</h1>
         <p className="mt-4 max-w-xl text-base text-smoke">Drives, meets and evenings with the club. Reserve a place and we will keep it for you.</p>
 
@@ -76,9 +76,10 @@ export function EventsPage() {
             </button>
           </div>
         ) : (
-          <div className="mt-10 space-y-12">
-            <section aria-labelledby="month-lead">
-              <h2 id="month-lead" className="type-display mb-5 text-2xl text-champagne">{leadMonth}</h2>
+          <div className="mt-12 space-y-10">
+            {/* The calendar reads as a timeline: each month's name holds the left column while its events scroll past */}
+            <section aria-labelledby="month-lead" className="grid gap-5 lg:grid-cols-[200px_minmax(0,1fr)] lg:gap-10">
+              <h2 id="month-lead" className="type-display text-3xl text-champagne lg:sticky lg:top-28 lg:self-start lg:pt-2">{leadMonth}</h2>
               <div className="space-y-4">
                 <FeaturedEvent event={lead} going={going.has(lead.id)} onToggle={() => toggle(lead.id)} />
                 {months[0]?.label === leadMonth && months[0].items.map((e) => <EventRow key={e.id} event={e} going={going.has(e.id)} onToggle={() => toggle(e.id)} />)}
@@ -87,11 +88,8 @@ export function EventsPage() {
             {months
               .filter((m) => m.label !== leadMonth)
               .map((m) => (
-                <section key={m.label} aria-label={m.label}>
-                  <h2 className="type-display mb-5 flex items-center gap-4 text-2xl text-champagne">
-                    {m.label}
-                    <span className="rule-champagne h-px flex-1" aria-hidden="true" />
-                  </h2>
+                <section key={m.label} aria-label={m.label} className="grid gap-5 border-t border-line pt-10 lg:grid-cols-[200px_minmax(0,1fr)] lg:gap-10">
+                  <h2 className="type-display text-3xl text-champagne lg:sticky lg:top-28 lg:self-start lg:pt-2">{m.label}</h2>
                   <div className="space-y-4">
                     {m.items.map((e) => (
                       <EventRow key={e.id} event={e} going={going.has(e.id)} onToggle={() => toggle(e.id)} />

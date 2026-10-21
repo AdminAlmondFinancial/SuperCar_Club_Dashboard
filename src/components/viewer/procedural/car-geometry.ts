@@ -332,12 +332,11 @@ export function createMaterials(paintHex: string, trim: Trim): CarMaterials {
       clearcoatRoughness: 0.06,
     }),
     glass: new THREE.MeshPhysicalMaterial({
-      color: '#56676d',
-      metalness: 0.45,
-      roughness: 0.04,
-      transparent: true,
-      opacity: 0.9,
-      envMapIntensity: 2.2,
+      // Dark tinted glass: reads as a real glasshouse instead of a clear bubble over the cabin.
+      color: '#1b2427',
+      metalness: 0.7,
+      roughness: 0.05,
+      envMapIntensity: 1.8,
     }),
     trim: new THREE.MeshStandardMaterial({ color: '#0b0c0d', roughness: 0.55, metalness: 0.3 }),
     chrome: new THREE.MeshStandardMaterial({ color: '#e8e8e8', roughness: 0.08, metalness: 1 }),

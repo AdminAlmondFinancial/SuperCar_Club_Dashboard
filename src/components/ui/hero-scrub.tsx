@@ -253,7 +253,7 @@ export function HeroScrub({
         }} />
 
         <div className="relative z-10 flex h-full w-full flex-col items-center justify-center gap-3 md:gap-4">
-          <h2 ref={titleTopRef} aria-hidden className="font-black uppercase" style={{
+          <h2 ref={titleTopRef} aria-hidden className="type-marque" style={{
             fontSize: "clamp(3.75rem, 12vw, 11rem)", lineHeight: 0.85, letterSpacing: "-0.04em",
           }}>{titleTop}</h2>
 
@@ -268,7 +268,7 @@ export function HeroScrub({
             )}
           </div>
 
-          <h2 ref={titleBottomRef} aria-hidden className="font-black uppercase" style={{
+          <h2 ref={titleBottomRef} aria-hidden className="type-marque" style={{
             fontSize: "clamp(3.75rem, 12vw, 11rem)", lineHeight: 0.85, letterSpacing: "-0.04em",
           }}>{titleBottom}</h2>
         </div>

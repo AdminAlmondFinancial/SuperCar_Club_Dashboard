@@ -100,10 +100,9 @@ function RegisterCard({ car }: { car: Car }) {
       <Link to={`/cars/${car.id}`} className="flex flex-1 flex-col">
         <div className="flex items-start justify-between gap-3 px-5 pt-5">
           <div>
-            <h3 className="text-[15px] font-semibold text-ivory">
-              {car.make} {car.model}
-            </h3>
-            <p className="text-[13px] text-smoke">
+            <p className="text-[13px] text-smoke">{car.make}</p>
+            <h3 className="type-display mt-1 text-[30px] text-ivory">{car.model}</h3>
+            <p className="mt-1.5 text-[13px] text-smoke">
               {car.year}, {car.engine}
             </p>
           </div>
@@ -111,7 +110,7 @@ function RegisterCard({ car }: { car: Car }) {
         </div>
         <div className="relative px-3 py-2">
           <div className="absolute inset-x-8 bottom-4 h-10 rounded-full bg-teal/10 blur-2xl" aria-hidden />
-          <CarRender car={car} className="relative mx-auto h-36 w-full transition-transform duration-700 ease-(--ease-luxe) group-hover:scale-[1.04]" />
+          <CarRender car={car} className="relative mx-auto h-40 w-full transition-transform md:h-56 duration-700 ease-(--ease-luxe) group-hover:scale-[1.04]" />
         </div>
       </Link>
       <div className="flex items-center justify-between gap-3 border-t border-line px-5 py-3.5">
@@ -171,7 +170,7 @@ export default function GaragePage() {
         <header className="mb-10 flex flex-wrap items-end justify-between gap-6">
           <div>
             <h1 className="type-display text-[clamp(2.75rem,6vw,5rem)] text-ivory">Your garage</h1>
-            <p className="mt-3 max-w-[52ch] text-[17px] text-smoke">
+            <p className="mt-3 max-w-[56ch] text-[17px] text-pretty text-smoke">
               Keep up to two cars here. Open one to walk all the way around it in 3D.
             </p>
           </div>
@@ -229,7 +228,7 @@ export default function GaragePage() {
           </div>
 
           {results.length ? (
-            <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            <ul className="grid gap-4 sm:grid-cols-2">
               {results.map((c) => (
                 <RegisterCard key={c.id} car={c} />
               ))}
