@@ -1,0 +1,35 @@
+{
+  // Cloudflare Worker + static assets for the SuperCar Club dashboard.
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "the-super-car-club",
+  "main": "worker/index.ts",
+  "compatibility_date": "2026-09-01",
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    // The Worker runs first for these paths; everything else is served straight from ./dist.
+    "run_worker_first": ["/api/*", "/admin", "/admin/*"]
+  },
+  "kv_namespaces": [
+    {
+      "binding": "CLUB_KV",
+      // the-super-car-club-CLUB_KV in the club's Cloudflare account
+      "id": "a93c05ac9a64490689d325a433aad96f"
+    }
+  ],
+  "vars": {
+    // The public address of the site, with no trailing slash. Used to build OAuth redirect URIs.
+    "APP_URL": "https://the-super-car-club.YOUR-SUBDOMAIN.workers.dev",
+    // Directory (tenant) used for Microsoft sign-in. "common" allows any Microsoft account.
+    "MICROSOFT_TENANT": "common"
+  }
+
+  // Secrets are NOT stored in this file. Set each one with: npx wrangler secret put <NAME>
+  //   GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET
+  //   MICROSOFT_CLIENT_ID, MICROSOFT_CLIENT_SECRET
+  //   SESSION_SECRET      (a long random string, 32+ characters)
+  //   ACCESS_TEAM_DOMAIN  (for example yourteam.cloudflareaccess.com)
+  //   ACCESS_AUD          (the Application Audience tag from Cloudflare Access)
+  // For local development put them in a .dev.vars file (never commit it).
+}
