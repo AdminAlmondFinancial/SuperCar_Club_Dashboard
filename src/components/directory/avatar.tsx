@@ -21,7 +21,7 @@ export function AttendeeStack({ initials, extra, label }: { initials: string[]; 
         <span
           key={`${i}-${idx}`}
           aria-hidden="true"
-          className="type-spec -ml-2 grid size-9 place-items-center rounded-full border-2 border-graphite bg-graphite-2 text-[10px] tracking-normal text-ivory first:ml-0"
+          className="type-spec -ml-2 grid size-9 place-items-center rounded-full border-2 border-graphite bg-graphite-2 text-[11px] tracking-normal text-ivory first:ml-0"
         >
           {i}
         </span>
@@ -29,7 +29,7 @@ export function AttendeeStack({ initials, extra, label }: { initials: string[]; 
       {extra > 0 && (
         <span
           aria-hidden="true"
-          className="type-spec -ml-2 grid h-9 min-w-9 place-items-center rounded-full border-2 border-graphite bg-ivory/10 px-1.5 text-[10px] text-smoke"
+          className="type-spec -ml-2 grid h-9 min-w-9 place-items-center rounded-full border-2 border-graphite bg-ivory/10 px-1.5 text-[11px] text-smoke"
         >
           +{extra}
         </span>

@@ -86,7 +86,7 @@ function Spec({ icon: Icon, value, label }: { icon: typeof Gauge; value: string;
   return (
     <span className="flex items-center gap-1.5 text-smoke" title={label}>
       <Icon className="size-3.5" strokeWidth={1.75} aria-hidden />
-      <span className="type-spec text-[12px] text-ivory/90">{value}</span>
+      <span className="type-spec text-caption text-ivory/90">{value}</span>
       <span className="sr-only">{label}</span>
     </span>
   )
@@ -166,7 +166,7 @@ export default function GaragePage() {
 
   return (
     <div className="field-verde min-h-dvh">
-      <div className="mx-auto max-w-[1440px] px-4 pt-28 pb-32 md:px-8 md:pt-32">
+      <div className="mx-auto max-w-[1440px] pb-dock px-4 pt-28 md:px-8 md:pt-32">
         <header className="mb-10 flex flex-wrap items-end justify-between gap-6">
           <div>
             <h1 className="type-display text-[clamp(2.75rem,6vw,5rem)] text-ivory">Your garage</h1>

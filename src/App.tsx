@@ -3,6 +3,7 @@ import { BrowserRouter, HashRouter, Route, Routes } from 'react-router-dom'
 
 import { AppShell } from '@/components/layout/app-shell'
 import { RequireMember } from '@/components/layout/require-member'
+import { PageLoading } from '@/components/ui/page-loading'
 import { AuthProvider } from '@/lib/auth'
 import { GarageProvider } from '@/lib/garage'
 import { EventsPage } from '@/pages/events'
@@ -23,7 +24,7 @@ export default function App() {
     <AuthProvider>
       <GarageProvider>
         <Router>
-          <Suspense fallback={<div className="min-h-dvh bg-ink" />}>
+          <Suspense fallback={<PageLoading />}>
             <Routes>
               <Route path="/sign-in" element={<SignInPage />} />
               <Route path="/studio/:carId" element={<StudioPage />} />

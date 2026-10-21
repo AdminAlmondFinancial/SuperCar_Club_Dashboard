@@ -44,7 +44,7 @@ export function EventsPage() {
   return (
     <div className="relative overflow-hidden">
       <ChequeredFlag className="pointer-events-none absolute -right-10 top-16 size-72 rotate-6 text-champagne/10 md:right-8 md:size-[26rem]" />
-      <div className="relative mx-auto max-w-[1280px] px-4 pb-28 pt-28 md:px-8 md:pb-24">
+      <div className="relative mx-auto max-w-[1280px] pb-dock px-4 pt-28 md:px-8">
         <h1 className="type-display text-5xl md:text-7xl">Events</h1>
         <p className="mt-4 max-w-xl text-base text-smoke">Drives, meets and evenings with the club. Reserve a place and we will keep it for you.</p>
 

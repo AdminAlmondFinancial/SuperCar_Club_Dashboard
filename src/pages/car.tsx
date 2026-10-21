@@ -45,7 +45,7 @@ export default function CarPage() {
       </div>
       <div aria-hidden className="absolute inset-x-0 top-0 h-[80vh] bg-[radial-gradient(70%_60%_at_50%_45%,rgba(58,155,138,0.16),transparent_70%)]" />
 
-      <div className="relative mx-auto max-w-[1440px] px-4 pt-24 pb-32 md:px-8 md:pt-28">
+      <div className="relative mx-auto max-w-[1440px] pb-dock px-4 pt-24 md:px-8 md:pt-28">
         <Link to="/garage" className="inline-flex items-center gap-2 text-sm text-smoke hover:text-ivory">
           <ArrowLeft className="size-4" /> Garage
         </Link>
@@ -108,7 +108,7 @@ export default function CarPage() {
               <p className="mt-3 text-[14px] leading-relaxed text-ink/75">{active ? active.detail : car.facts[factIndex]}</p>
               {!active && (
                 <div className="mt-5 flex items-center justify-between">
-                  <span className="type-spec text-[12px] text-ink/50">
+                  <span className="type-spec text-caption text-ink/50">
                     {factIndex + 1} of {car.facts.length}
                   </span>
                   <div className="flex gap-1.5">
@@ -204,7 +204,7 @@ export default function CarPage() {
           </ol>
         </section>
 
-        <p className="mt-16 text-[12px] text-smoke/70">
+        <p className="mt-16 text-caption text-smoke">
           {car.id === 'ferrari-458-italia'
             ? 'Ferrari 458 model by vicent091036 on Sketchfab, as distributed with the three.js examples.'
             : 'Stylised model built from the car’s published dimensions. Figures are manufacturer claims and may vary by market.'}

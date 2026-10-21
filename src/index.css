@@ -11,7 +11,17 @@
   teal       #3A9B8A  Amalfi teal; the one interactive accent
   champagne  #CDB98F  brushed brass; memorabilia, crests, fine rules
   ivory      #EEEAE2  primary text
-  smoke      #8C9591  secondary text
+  smoke      #A7AFAB  secondary text, raised from #8C9591 so small copy stays readable
+
+  Type scale (sans unless noted)
+  caption 13px · label 14px · body 16px · lead 18px
+  h3 24-28px serif · h2 32-44px serif · h1 48-80px serif
+
+  Cards
+  .panel          standard surface
+  .panel-feature  emerald, for the one or two featured items on a screen
+  .tile           compact cell inside a card
+  .interactive    adds the hover and focus border to any of the above
 */
 
 @theme {
@@ -22,7 +32,7 @@
   --color-teal-bright: #5cc2ae;
   --color-champagne: #cdb98f;
   --color-ivory: #eeeae2;
-  --color-smoke: #8c9591;
+  --color-smoke: #a7afab;
   --color-graphite: #101614;
   --color-graphite-2: #17201d;
   --color-line: rgb(238 234 226 / 0.09);
@@ -31,6 +41,16 @@
 
   --font-display: "Instrument Serif", "Didot", "Bodoni 72", Georgia, serif;
   --font-sans: "Instrument Sans Variable", "Instrument Sans", ui-sans-serif, system-ui, sans-serif;
+
+  /* text-xs is never smaller than 13px; captions are the smallest size we use */
+  --text-xs: 0.8125rem;
+  --text-xs--line-height: 1.45;
+  --text-caption: 0.8125rem;
+  --text-caption--line-height: 1.45;
+  --text-label: 0.875rem;
+  --text-label--line-height: 1.45;
+  --text-lead: 1.125rem;
+  --text-lead--line-height: 1.6;
 
   --radius-panel: 28px;
   --radius-tile: 18px;
@@ -52,7 +72,7 @@
   --secondary: #17201d;
   --secondary-foreground: #eeeae2;
   --muted: #17201d;
-  --muted-foreground: #8c9591;
+  --muted-foreground: #a7afab;
   --accent: #3a9b8a;
   --accent-foreground: #000000;
   --destructive: #d8574a;
@@ -96,7 +116,7 @@
     background: var(--color-ink);
     color: var(--color-ivory);
     font-family: var(--font-sans);
-    font-size: 15px;
+    font-size: 16px;
     line-height: 1.55;
     min-height: 100dvh;
   }
@@ -107,6 +127,12 @@
   :focus-visible {
     outline: 2px solid var(--color-teal-bright);
     outline-offset: 3px;
+  }
+  h1,
+  h2,
+  h3,
+  p {
+    overflow-wrap: break-word;
   }
   @media (prefers-reduced-motion: reduce) {
     html {
@@ -175,6 +201,45 @@
     border-radius: var(--radius-tile);
     background: rgb(238 234 226 / 0.03);
     border: 1px solid var(--color-line);
+  }
+  .interactive {
+    transition: border-color 200ms var(--ease-luxe), background-color 200ms var(--ease-luxe);
+  }
+  .interactive:hover {
+    border-color: var(--color-line-strong);
+  }
+  .interactive:focus-within {
+    border-color: rgb(92 194 174 / 0.45);
+  }
+
+  /* Small heading above a section or card title */
+  .eyebrow {
+    font-size: var(--text-caption);
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-champagne);
+  }
+
+  /* Space under fixed content: the mobile dock, plus the phone's home-indicator area */
+  .pb-dock {
+    padding-bottom: calc(7rem + env(safe-area-inset-bottom));
+  }
+  @media (min-width: 768px) {
+    .pb-dock {
+      padding-bottom: 6rem;
+    }
+  }
+
+  /* A gentle entrance for page content; off when the visitor prefers less motion */
+  .enter {
+    animation: enter 240ms var(--ease-luxe) both;
+  }
+  @keyframes enter {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
   }
   .rule-champagne {
     height: 1px;
