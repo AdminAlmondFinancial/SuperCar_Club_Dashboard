@@ -24,7 +24,7 @@ export type Car = {
   serviceIntervalKm: number;
   colours: { name: string; hex: string }[];
   facts: string[];
-  hotspots: { exterior: Hotspot[]; interior: Hotspot[]; engine: Hotspot[] };
+  hotspots: Hotspot[];
 };
 
 export const cars: Car[] = [
@@ -69,25 +69,12 @@ export const cars: Car[] = [
       "New Ferrari cars are covered by the brand's seven-year maintenance programme.",
       "The name refers to the Amalfi Coast in southern Italy.",
     ],
-    hotspots: {
-      exterior: [
-        { id: "front-nose", label: "Sculpted nose", detail: "A clean, grille-less front end with slim lights gives the Amalfi a minimalist face.", pos: [1, 0.3, 0] },
-        { id: "rear-aero", label: "Active rear spoiler", detail: "A rear flap raises and lowers to balance drag and downforce at speed.", pos: [-0.95, 0.55, 0] },
-        { id: "wheels", label: "Wheels", detail: "Large alloy wheels fill the arches of the long, low body.", pos: [0.55, 0.2, 1] },
-        { id: "exhaust", label: "Quad tailpipes", detail: "Four tailpipes sit under the rear diffuser.", pos: [-1, 0.2, 0.3] },
-      ],
-      interior: [
-        { id: "driver-display", label: "Driver display", detail: "A curved digital cluster sits behind the steering wheel.", pos: [0.25, 0.55, -0.35] },
-        { id: "steering-wheel", label: "Steering wheel", detail: "Carries the controls Ferrari groups around the wheel, including the manettino drive-mode dial.", pos: [0.3, 0.52, -0.35] },
-        { id: "centre-screen", label: "Central touchscreen", detail: "Handles infotainment and climate functions.", pos: [0.15, 0.48, 0] },
-        { id: "seats", label: "Sports seats", detail: "Two front seats are supplemented by a small rear bench.", pos: [-0.1, 0.45, 0.3] },
-      ],
-      engine: [
-        { id: "v8", label: "3.9L twin-turbo V8", detail: "Mounted ahead of the cabin, behind the front axle, as a front-mid layout.", pos: [0.6, 0.4, 0] },
-        { id: "turbos", label: "Turbochargers", detail: "Two turbos feed the V8, sitting in the engine's central vee.", pos: [0.6, 0.45, 0.1] },
-        { id: "gearbox", label: "Dual-clutch gearbox", detail: "The 8-speed transmission is mounted at the rear in a transaxle layout.", pos: [-0.5, 0.25, 0] },
-      ],
-    },
+    hotspots: [
+      { id: "front-nose", label: "Sculpted nose", detail: "A clean, grille-less front end with slim lights gives the Amalfi a minimalist face.", pos: [1, 0.3, 0] },
+      { id: "rear-aero", label: "Active rear spoiler", detail: "A rear flap raises and lowers to balance drag and downforce at speed.", pos: [-0.95, 0.55, 0] },
+      { id: "wheels", label: "Wheels", detail: "Large alloy wheels fill the arches of the long, low body.", pos: [0.55, 0.2, 1] },
+      { id: "exhaust", label: "Quad tailpipes", detail: "Four tailpipes sit under the rear diffuser.", pos: [-1, 0.2, 0.3] },
+    ],
   },
   {
     id: "ferrari-458-italia",
@@ -130,25 +117,12 @@ export const cars: Car[] = [
       "The name combines the engine's 4.5-litre displacement and 8 cylinders with Italia.",
       "Its folding aluminium hard top retracts in about 14 seconds and stows ahead of the engine.",
     ],
-    hotspots: {
-      exterior: [
-        { id: "front-intakes", label: "Front intakes", detail: "Twin air intakes and aero winglets in the nose direct air around the car.", pos: [1, 0.25, 0] },
-        { id: "side-intakes", label: "Side air intakes", detail: "Large side intakes feed the mid-mounted V8.", pos: [-0.2, 0.4, 1] },
-        { id: "rear-lights", label: "Round tail lights", detail: "Twin circular lamps recall classic Ferrari sports cars.", pos: [-1, 0.45, 0.4] },
-        { id: "exhaust", label: "Triple-outlet exhaust", detail: "Exhaust outlets sit between the rear lights.", pos: [-1, 0.25, 0] },
-      ],
-      interior: [
-        { id: "steering-wheel", label: "Button-laden steering wheel", detail: "Engine start, manettino dial, indicators and wipers are on the wheel.", pos: [0.3, 0.5, -0.35] },
-        { id: "rev-counter", label: "Central rev counter", detail: "A large central rev counter flanked by digital displays.", pos: [0.25, 0.55, -0.35] },
-        { id: "paddles", label: "Gear paddles", detail: "Large fixed paddles select gears manually.", pos: [0.3, 0.52, -0.4] },
-        { id: "seats", label: "Sports seats", detail: "Two supportive sports seats.", pos: [0, 0.45, 0.3] },
-      ],
-      engine: [
-        { id: "v8", label: "4.5L V8", detail: "Mid-mounted, naturally aspirated and direct-injected.", pos: [-0.5, 0.4, 0] },
-        { id: "intake", label: "Intake plenum", detail: "Air from the side intakes reaches the V8's intake system.", pos: [-0.4, 0.5, 0.1] },
-        { id: "dct", label: "7-speed dual-clutch", detail: "The gearbox sits behind the engine in a transaxle layout.", pos: [-0.75, 0.25, 0] },
-      ],
-    },
+    hotspots: [
+      { id: "front-intakes", label: "Front intakes", detail: "Twin air intakes and aero winglets in the nose direct air around the car.", pos: [1, 0.25, 0] },
+      { id: "side-intakes", label: "Side air intakes", detail: "Large side intakes feed the mid-mounted V8.", pos: [-0.2, 0.4, 1] },
+      { id: "rear-lights", label: "Round tail lights", detail: "Twin circular lamps recall classic Ferrari sports cars.", pos: [-1, 0.45, 0.4] },
+      { id: "exhaust", label: "Triple-outlet exhaust", detail: "Exhaust outlets sit between the rear lights.", pos: [-1, 0.25, 0] },
+    ],
   },
   {
     id: "porsche-911-gt3-rs",
@@ -191,25 +165,12 @@ export const cars: Car[] = [
       "Centre-lock wheels are standard, as on Porsche racing cars.",
       "The GT3 RS sits above the standard GT3 in Porsche's GT line-up.",
     ],
-    hotspots: {
-      exterior: [
-        { id: "rear-wing", label: "Swan-neck rear wing", detail: "The large wing and its active elements generate downforce.", pos: [-0.95, 0.85, 0] },
-        { id: "front-wing", label: "Front aero elements", detail: "Front flaps open and close to adjust aerodynamic balance.", pos: [1, 0.25, 0] },
-        { id: "roof-scoop", label: "Roof scoop", detail: "A roof intake feeds air toward the engine.", pos: [-0.1, 1, 0] },
-        { id: "wheels", label: "Centre-lock wheels", detail: "Wheels are held by a single central nut, as on race cars.", pos: [0.55, 0.2, 1] },
-      ],
-      interior: [
-        { id: "cluster", label: "Digital instrument cluster", detail: "A configurable display with a track-focused layout.", pos: [0.25, 0.55, -0.35] },
-        { id: "seats", label: "Bucket seats", detail: "Lightweight, highly supportive front seats.", pos: [0, 0.45, 0.3] },
-        { id: "steering-wheel", label: "GT steering wheel", detail: "Features a drive-mode selector and controls.", pos: [0.3, 0.52, -0.35] },
-        { id: "roll-cage", label: "Rear roll cage provision", detail: "The rear area is stripped, with no rear seats fitted.", pos: [-0.3, 0.6, 0] },
-      ],
-      engine: [
-        { id: "flat-six", label: "4.0L flat-six", detail: "Rear-mounted, naturally aspirated and rev-happy.", pos: [-0.8, 0.35, 0] },
-        { id: "intake", label: "Individual throttle bodies", detail: "Each cylinder has its own throttle body for response.", pos: [-0.75, 0.45, 0.1] },
-        { id: "pdk", label: "7-speed PDK", detail: "A dual-clutch gearbox sits ahead of the engine.", pos: [-0.5, 0.25, 0] },
-      ],
-    },
+    hotspots: [
+      { id: "rear-wing", label: "Swan-neck rear wing", detail: "The large wing and its active elements generate downforce.", pos: [-0.95, 0.85, 0] },
+      { id: "front-wing", label: "Front aero elements", detail: "Front flaps open and close to adjust aerodynamic balance.", pos: [1, 0.25, 0] },
+      { id: "roof-scoop", label: "Roof scoop", detail: "A roof intake feeds air toward the engine.", pos: [-0.1, 1, 0] },
+      { id: "wheels", label: "Centre-lock wheels", detail: "Wheels are held by a single central nut, as on race cars.", pos: [0.55, 0.2, 1] },
+    ],
   },
   {
     id: "lamborghini-revuelto",
@@ -252,25 +213,12 @@ export const cars: Car[] = [
       "The name comes from a Spanish fighting bull, in keeping with Lamborghini tradition.",
       "The quoted 1,772 kg is a dry weight.",
     ],
-    hotspots: {
-      exterior: [
-        { id: "scissor-doors", label: "Scissor doors", detail: "Doors open upward and forward, a Lamborghini V12 signature.", pos: [0.1, 0.6, 1] },
-        { id: "hexagon-lights", label: "Hexagonal lights", detail: "Hexagonal design motifs appear throughout the car.", pos: [1, 0.4, 0.5] },
-        { id: "rear-engine-bay", label: "Glazed engine cover", detail: "The engine cover shows off the V12.", pos: [-0.6, 0.65, 0] },
-        { id: "rear-diffuser", label: "Rear diffuser", detail: "A big diffuser manages airflow under the car.", pos: [-1, 0.2, 0] },
-      ],
-      interior: [
-        { id: "driver-display", label: "Driver display", detail: "A digital cluster in front of the driver.", pos: [0.25, 0.55, -0.35] },
-        { id: "passenger-display", label: "Passenger display", detail: "A dedicated passenger-side screen shows performance data.", pos: [0.2, 0.52, 0.35] },
-        { id: "start", label: "Start button cover", detail: "A flip-up cover hides the start button in the fighter-jet style.", pos: [0.1, 0.45, 0] },
-        { id: "seats", label: "Sports seats", detail: "Low-set bucket seats keep occupants close to the floor.", pos: [-0.1, 0.4, 0.3] },
-      ],
-      engine: [
-        { id: "v12", label: "6.5L V12", detail: "Mounted longitudinally behind the cabin.", pos: [-0.5, 0.4, 0] },
-        { id: "motors", label: "Front electric motors", detail: "Two motors drive the front wheels.", pos: [0.6, 0.25, 0] },
-        { id: "battery", label: "Hybrid battery", detail: "A battery pack in the central tunnel powers the motors.", pos: [0, 0.2, 0] },
-      ],
-    },
+    hotspots: [
+      { id: "scissor-doors", label: "Scissor doors", detail: "Doors open upward and forward, a Lamborghini V12 signature.", pos: [0.1, 0.6, 1] },
+      { id: "hexagon-lights", label: "Hexagonal lights", detail: "Hexagonal design motifs appear throughout the car.", pos: [1, 0.4, 0.5] },
+      { id: "rear-engine-bay", label: "Glazed engine cover", detail: "The engine cover shows off the V12.", pos: [-0.6, 0.65, 0] },
+      { id: "rear-diffuser", label: "Rear diffuser", detail: "A big diffuser manages airflow under the car.", pos: [-1, 0.2, 0] },
+    ],
   },
   {
     id: "mclaren-750s",
@@ -312,25 +260,12 @@ export const cars: Car[] = [
       "Roof-mounted air intakes are built into the carbon roof structure.",
       "McLaren builds the car at the McLaren Production Centre in Woking, England.",
     ],
-    hotspots: {
-      exterior: [
-        { id: "dihedral-door", label: "Dihedral door", detail: "Doors open up and outward, freeing space to climb in.", pos: [0.1, 0.65, 1] },
-        { id: "rear-wing", label: "Active rear wing", detail: "The wing rises and tilts for downforce and braking.", pos: [-0.95, 0.75, 0] },
-        { id: "front-splitter", label: "Front splitter", detail: "A low front splitter helps manage airflow.", pos: [1, 0.15, 0] },
-        { id: "roof-scoop", label: "Roof intake", detail: "An air scoop above the cabin feeds the engine.", pos: [-0.1, 1, 0] },
-      ],
-      interior: [
-        { id: "driver-display", label: "Folding driver display", detail: "The instrument screen can fold down to a slim display.", pos: [0.25, 0.55, -0.35] },
-        { id: "steering-wheel", label: "Button-free steering wheel", detail: "A clean wheel with controls kept on the cluster and centre console.", pos: [0.3, 0.52, -0.35] },
-        { id: "centre-screen", label: "Portrait touchscreen", detail: "A vertical infotainment screen sits in the centre.", pos: [0.1, 0.45, 0] },
-        { id: "seats", label: "Seats", detail: "Lightweight, supportive seats.", pos: [-0.1, 0.4, 0.3] },
-      ],
-      engine: [
-        { id: "v8", label: "4.0L twin-turbo V8", detail: "Mid-mounted behind the cabin.", pos: [-0.5, 0.4, 0] },
-        { id: "turbos", label: "Turbochargers", detail: "Two turbos sit in the V8's vee.", pos: [-0.5, 0.5, 0] },
-        { id: "gearbox", label: "Seamless-shift gearbox", detail: "A dual-clutch unit mounted behind the engine.", pos: [-0.8, 0.25, 0] },
-      ],
-    },
+    hotspots: [
+      { id: "dihedral-door", label: "Dihedral door", detail: "Doors open up and outward, freeing space to climb in.", pos: [0.1, 0.65, 1] },
+      { id: "rear-wing", label: "Active rear wing", detail: "The wing rises and tilts for downforce and braking.", pos: [-0.95, 0.75, 0] },
+      { id: "front-splitter", label: "Front splitter", detail: "A low front splitter helps manage airflow.", pos: [1, 0.15, 0] },
+      { id: "roof-scoop", label: "Roof intake", detail: "An air scoop above the cabin feeds the engine.", pos: [-0.1, 1, 0] },
+    ],
   },
   {
     id: "aston-martin-vanquish",
@@ -373,25 +308,12 @@ export const cars: Car[] = [
       "It is a 2+2, with small rear seats.",
       "The car is built at the company's Gaydon headquarters in Warwickshire.",
     ],
-    hotspots: {
-      exterior: [
-        { id: "grille", label: "Wide grille", detail: "The large grille is a signature Aston Martin feature.", pos: [1, 0.3, 0] },
-        { id: "bonnet-vents", label: "Bonnet vents", detail: "Vents on the bonnet help release engine heat.", pos: [0.6, 0.55, 0] },
-        { id: "rear-lights", label: "Slim rear lights", detail: "A narrow light bar spans the tail.", pos: [-1, 0.5, 0] },
-        { id: "wheels", label: "Alloy wheels", detail: "Big alloy wheels fill the arches.", pos: [0.55, 0.2, 1] },
-      ],
-      interior: [
-        { id: "cluster", label: "Digital cluster", detail: "A digital display behind the wheel.", pos: [0.25, 0.55, -0.35] },
-        { id: "infotainment", label: "Infotainment screen", detail: "The central screen handles navigation and media.", pos: [0.15, 0.5, 0] },
-        { id: "buttons", label: "Physical controls", detail: "Physical buttons remain for key functions.", pos: [0.1, 0.45, 0] },
-        { id: "seats", label: "Seats", detail: "Two front seats plus a small rear bench.", pos: [-0.1, 0.45, 0.3] },
-      ],
-      engine: [
-        { id: "v12", label: "5.2L twin-turbo V12", detail: "Mounted behind the front axle.", pos: [0.6, 0.4, 0] },
-        { id: "turbos", label: "Turbochargers", detail: "Two turbos feed the V12.", pos: [0.6, 0.5, 0] },
-        { id: "gearbox", label: "Rear-mounted 8-speed", detail: "The automatic gearbox drives the rear wheels.", pos: [-0.5, 0.25, 0] },
-      ],
-    },
+    hotspots: [
+      { id: "grille", label: "Wide grille", detail: "The large grille is a signature Aston Martin feature.", pos: [1, 0.3, 0] },
+      { id: "bonnet-vents", label: "Bonnet vents", detail: "Vents on the bonnet help release engine heat.", pos: [0.6, 0.55, 0] },
+      { id: "rear-lights", label: "Slim rear lights", detail: "A narrow light bar spans the tail.", pos: [-1, 0.5, 0] },
+      { id: "wheels", label: "Alloy wheels", detail: "Big alloy wheels fill the arches.", pos: [0.55, 0.2, 1] },
+    ],
   },
   {
     id: "mercedes-amg-g63",
@@ -434,25 +356,12 @@ export const cars: Car[] = [
       "The door-closing sound has been a deliberate design detail since the original.",
       "Each AMG V8 is assembled by hand by a single engine builder.",
     ],
-    hotspots: {
-      exterior: [
-        { id: "indicators", label: "Bonnet indicators", detail: "Fender-top indicators are a G-Class trademark.", pos: [0.6, 0.7, 0.8] },
-        { id: "spare", label: "Rear-mounted spare wheel", detail: "A spare wheel cover sits on the tailgate.", pos: [-1, 0.6, 0] },
-        { id: "grille", label: "AMG grille", detail: "The AMG-specific grille has vertical slats.", pos: [1, 0.5, 0] },
-        { id: "exhaust", label: "Side exhausts", detail: "Exhaust outlets exit at the sides of the car.", pos: [0.1, 0.25, 1] },
-      ],
-      interior: [
-        { id: "screens", label: "Widescreen displays", detail: "Two digital screens under one glass panel.", pos: [0.25, 0.6, 0] },
-        { id: "grab-handle", label: "Passenger grab handle", detail: "A handle in front of the passenger recalls the original.", pos: [0.3, 0.55, 0.4] },
-        { id: "steering-wheel", label: "AMG steering wheel", detail: "Includes AMG drive-mode controls.", pos: [0.3, 0.55, -0.35] },
-        { id: "seats", label: "AMG seats", detail: "Supportive front seats.", pos: [0, 0.5, 0.3] },
-      ],
-      engine: [
-        { id: "v8", label: "4.0L twin-turbo V8", detail: "Mounted at the front, with turbos in the engine's vee.", pos: [0.65, 0.5, 0] },
-        { id: "starter-generator", label: "48V starter-generator", detail: "A mild-hybrid unit that assists the engine.", pos: [0.4, 0.45, 0] },
-        { id: "locking-diffs", label: "Locking differentials", detail: "Three differential locks help off-road.", pos: [0, 0.2, 0] },
-      ],
-    },
+    hotspots: [
+      { id: "indicators", label: "Bonnet indicators", detail: "Fender-top indicators are a G-Class trademark.", pos: [0.6, 0.7, 0.8] },
+      { id: "spare", label: "Rear-mounted spare wheel", detail: "A spare wheel cover sits on the tailgate.", pos: [-1, 0.6, 0] },
+      { id: "grille", label: "AMG grille", detail: "The AMG-specific grille has vertical slats.", pos: [1, 0.5, 0] },
+      { id: "exhaust", label: "Side exhausts", detail: "Exhaust outlets exit at the sides of the car.", pos: [0.1, 0.25, 1] },
+    ],
   },
   {
     id: "rolls-royce-spectre",
@@ -495,25 +404,12 @@ export const cars: Car[] = [
       "Rolls-Royce says prototypes covered some 2.5 million kilometres in testing.",
       "It is built at the Goodwood plant in West Sussex.",
     ],
-    hotspots: {
-      exterior: [
-        { id: "grille", label: "Pantheon grille", detail: "The illuminated grille is the car's front centrepiece.", pos: [1, 0.45, 0] },
-        { id: "split-lights", label: "Split headlamps", detail: "Slim upper lights sit above main lamps.", pos: [1, 0.5, 0.4] },
-        { id: "coach-doors", label: "Coach doors", detail: "Large rear-hinged doors give easy access.", pos: [0, 0.6, 1] },
-        { id: "rear-end", label: "Fastback tail", detail: "A coupe roofline slopes to a raised tail.", pos: [-1, 0.6, 0] },
-      ],
-      interior: [
-        { id: "starlight", label: "Starlight headliner", detail: "Fibre-optic lights simulate a night sky.", pos: [-0.1, 0.95, 0] },
-        { id: "fascia", label: "Illuminated fascia", detail: "The fascia can be lit with a star pattern.", pos: [0.2, 0.55, 0.3] },
-        { id: "infotainment", label: "Infotainment display", detail: "A large central screen controls the car.", pos: [0.15, 0.5, 0] },
-        { id: "seats", label: "Seats", detail: "Spacious, luxurious seating for four.", pos: [-0.1, 0.5, 0.3] },
-      ],
-      engine: [
-        { id: "front-motor", label: "Front motor", detail: "One of two electric motors, driving the front axle.", pos: [0.6, 0.25, 0] },
-        { id: "rear-motor", label: "Rear motor", detail: "The second motor drives the rear axle.", pos: [-0.6, 0.25, 0] },
-        { id: "battery", label: "102 kWh battery", detail: "The battery pack sits beneath the floor.", pos: [0, 0.15, 0] },
-      ],
-    },
+    hotspots: [
+      { id: "grille", label: "Pantheon grille", detail: "The illuminated grille is the car's front centrepiece.", pos: [1, 0.45, 0] },
+      { id: "split-lights", label: "Split headlamps", detail: "Slim upper lights sit above main lamps.", pos: [1, 0.5, 0.4] },
+      { id: "coach-doors", label: "Coach doors", detail: "Large rear-hinged doors give easy access.", pos: [0, 0.6, 1] },
+      { id: "rear-end", label: "Fastback tail", detail: "A coupe roofline slopes to a raised tail.", pos: [-1, 0.6, 0] },
+    ],
   },
   {
     id: "bentley-continental-gt-speed",
@@ -556,25 +452,12 @@ export const cars: Car[] = [
       "This generation is the fourth Continental GT.",
       "It is built at Bentley's Crewe factory in Cheshire.",
     ],
-    hotspots: {
-      exterior: [
-        { id: "grille", label: "Matrix grille", detail: "The upright grille is flanked by round headlamps.", pos: [1, 0.4, 0] },
-        { id: "rear-haunches", label: "Muscular rear haunches", detail: "Wide rear wings give the car a strong stance.", pos: [-0.7, 0.55, 1] },
-        { id: "wheels", label: "Large wheels", detail: "Big alloys fill the wheel arches.", pos: [0.55, 0.2, 1] },
-        { id: "charge-port", label: "Charging port", detail: "A flap hides the plug-in charging socket.", pos: [-0.7, 0.45, 1] },
-      ],
-      interior: [
-        { id: "rotating-display", label: "Rotating dash display", detail: "The dash can rotate to show a screen, dials or plain veneer.", pos: [0.2, 0.55, 0.1] },
-        { id: "diamond-knurling", label: "Knurled metal controls", detail: "Machined metal controls add tactile quality.", pos: [0.1, 0.45, 0] },
-        { id: "seats", label: "Quilted seats", detail: "Hand-finished leather seats.", pos: [-0.1, 0.45, 0.3] },
-        { id: "wood", label: "Veneers", detail: "Choice of real wood and carbon veneers.", pos: [0.2, 0.5, -0.2] },
-      ],
-      engine: [
-        { id: "v8", label: "4.0L twin-turbo V8", detail: "Mounted at the front of the car.", pos: [0.6, 0.4, 0] },
-        { id: "motor", label: "Electric motor", detail: "An electric motor adds power to the V8.", pos: [-0.5, 0.25, 0] },
-        { id: "battery", label: "Hybrid battery", detail: "A plug-in battery sits near the rear.", pos: [-0.7, 0.25, 0] },
-      ],
-    },
+    hotspots: [
+      { id: "grille", label: "Matrix grille", detail: "The upright grille is flanked by round headlamps.", pos: [1, 0.4, 0] },
+      { id: "rear-haunches", label: "Muscular rear haunches", detail: "Wide rear wings give the car a strong stance.", pos: [-0.7, 0.55, 1] },
+      { id: "wheels", label: "Large wheels", detail: "Big alloys fill the wheel arches.", pos: [0.55, 0.2, 1] },
+      { id: "charge-port", label: "Charging port", detail: "A flap hides the plug-in charging socket.", pos: [-0.7, 0.45, 1] },
+    ],
   },
   {
     id: "bugatti-chiron-super-sport",
@@ -617,24 +500,11 @@ export const cars: Car[] = [
       "Power goes through a 7-speed dual-clutch gearbox to all four wheels.",
       "Cars are hand-assembled at Bugatti's Molsheim atelier in France.",
     ],
-    hotspots: {
-      exterior: [
-        { id: "horseshoe-grille", label: "Horseshoe grille", detail: "A signature Bugatti design cue.", pos: [1, 0.4, 0] },
-        { id: "c-line", label: "C-line", detail: "A C-shaped line along the side is a Chiron styling motif.", pos: [0, 0.5, 1] },
-        { id: "long-tail", label: "Extended tail", detail: "A longer rear body reduces drag at speed.", pos: [-1, 0.5, 0] },
-        { id: "exhaust", label: "Large central exhaust", detail: "Prominent exhaust outlets at the rear.", pos: [-1, 0.3, 0] },
-      ],
-      interior: [
-        { id: "speedometer", label: "Large speedometer", detail: "A prominent central speedometer.", pos: [0.25, 0.55, -0.3] },
-        { id: "centre-console", label: "Machined centre console", detail: "A metal and glass console.", pos: [0, 0.45, 0] },
-        { id: "steering-wheel", label: "Steering wheel", detail: "A wheel carrying the Bugatti emblem.", pos: [0.3, 0.52, -0.35] },
-        { id: "seats", label: "Seats", detail: "Two supportive leather and carbon-fibre seats.", pos: [0, 0.4, 0.3] },
-      ],
-      engine: [
-        { id: "w16", label: "8.0L W16", detail: "Mid-mounted behind the cabin, visible through the engine cover.", pos: [-0.5, 0.4, 0] },
-        { id: "turbos", label: "Four turbochargers", detail: "Four turbos feed the engine.", pos: [-0.5, 0.5, 0] },
-        { id: "cooling", label: "Cooling system", detail: "Many radiators manage heat from the engine.", pos: [0, 0.35, 0.5] },
-      ],
-    },
+    hotspots: [
+      { id: "horseshoe-grille", label: "Horseshoe grille", detail: "A signature Bugatti design cue.", pos: [1, 0.4, 0] },
+      { id: "c-line", label: "C-line", detail: "A C-shaped line along the side is a Chiron styling motif.", pos: [0, 0.5, 1] },
+      { id: "long-tail", label: "Extended tail", detail: "A longer rear body reduces drag at speed.", pos: [-1, 0.5, 0] },
+      { id: "exhaust", label: "Large central exhaust", detail: "Prominent exhaust outlets at the rear.", pos: [-1, 0.3, 0] },
+    ],
   },
 ];

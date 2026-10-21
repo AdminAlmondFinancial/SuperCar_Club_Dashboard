@@ -1,6 +1,6 @@
 # SuperCar Club dashboard
 
-The members' dashboard for the SuperCar Club: a home page with the season's drives and meets, service reminders and the cars in other members' garages; a garage where each member keeps up to two cars; and a 3D viewer for ten real cars with exterior, cutaway interior and X-ray engine views.
+The members' dashboard for the SuperCar Club: a home page with the season's drives and meets, service reminders and the cars in other members' garages; a garage where each member keeps up to two cars; and an interactive 3D view of the outside of ten real cars, with labelled features, paint colours and facts.
 
 It is a React app (Vite, TypeScript, Tailwind CSS and shadcn-style components) served by a Cloudflare Worker, which also handles sign-in with Google and Microsoft and protects the admin page with Cloudflare Access.
 
@@ -25,7 +25,7 @@ See [DEPLOY.md](DEPLOY.md) for the full step-by-step guide. In short: `npx wrang
 | --- | --- |
 | `src/pages/` | One file per page: sign-in, home, garage, car, events, members |
 | `src/components/ui/` | Base components (button, card, input, badge) and the `hero-scrub` scroll animation |
-| `src/components/viewer/` | The 3D viewer and the generators for the stylised car and engine models |
+| `src/components/viewer/` | The 3D viewer and the generator for the stylised car models |
 | `src/components/memorabilia/` | Line-art decorations (rev counter, chequered flag, steering wheel and more) |
 | `src/data/` | The ten cars with specs and facts, plus sample events and members |
 | `src/lib/` | Sign-in state and the member's garage |
@@ -38,7 +38,7 @@ See [DEPLOY.md](DEPLOY.md) for the full step-by-step guide. In short: `npx wrang
 
 ## About the 3D cars
 
-The Ferrari 458 Spider uses a detailed model by vicent091036 on Sketchfab, as distributed with the three.js examples; check its licence before commercial use. The other nine cars are stylised models generated in code from each car's published length, width, height and wheelbase, with touches specific to each car (wings, grilles, intakes, wheel designs and caliper colours). Engines are generated from each car's layout: V8, V12, flat-six, W16 or twin electric motors, with turbos and hybrid motors where the car has them.
+The Ferrari 458 Spider uses a detailed model by vicent091036 on Sketchfab, as distributed with the three.js examples; check its licence before commercial use. The other nine cars are stylised models generated in code from each car's published length, width, height and wheelbase, with touches specific to each car (wings, grilles, intakes, wheel designs and caliper colours).
 
 ## About the car data
 

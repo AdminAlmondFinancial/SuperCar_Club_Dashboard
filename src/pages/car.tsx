@@ -1,19 +1,13 @@
-import { ArrowLeft, Check, ChevronLeft, ChevronRight, Cog, Hand, Plus, Armchair, Car as CarIcon } from 'lucide-react'
+import { ArrowLeft, Check, ChevronLeft, ChevronRight, Hand, Plus } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { Link, Navigate, useParams } from 'react-router-dom'
 
 import { Piston } from '@/components/memorabilia'
 import { Button } from '@/components/ui/button'
-import { CarViewer, type ViewMode } from '@/components/viewer/car-viewer'
+import { CarViewer } from '@/components/viewer/car-viewer'
 import { cars } from '@/data/cars'
 import { GARAGE_LIMIT, useGarage } from '@/lib/garage'
 import { cn } from '@/lib/utils'
-
-const MODES: { key: ViewMode; label: string; icon: typeof CarIcon; hint: string }[] = [
-  { key: 'exterior', label: 'Exterior', icon: CarIcon, hint: 'Drag to walk around the car. Scroll or pinch to zoom.' },
-  { key: 'interior', label: 'Interior', icon: Armchair, hint: 'The roof lifts away so you can see the cabin. Drag to look around.' },
-  { key: 'engine', label: 'Engine', icon: Cog, hint: 'The body turns to glass so you can see the drivetrain. Drag to orbit.' },
-]
 
 const gbp = new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP', maximumFractionDigits: 0 })
 
@@ -23,22 +17,16 @@ export default function CarPage() {
   const { entries, add, update, isFull } = useGarage()
   const entry = entries.find((e) => e.carId === carId)
 
-  const [mode, setMode] = useState<ViewMode>('exterior')
   const [hotspot, setHotspot] = useState<string | null>(null)
   const [localColour, setLocalColour] = useState<string | null>(null)
   const [factIndex, setFactIndex] = useState(0)
 
   const colour = entry?.colour ?? localColour ?? car?.colours[0].hex ?? '#888'
-  const active = useMemo(() => car?.hotspots[mode].find((h) => h.id === hotspot) ?? null, [car, mode, hotspot])
+  const active = useMemo(() => car?.hotspots.find((h) => h.id === hotspot) ?? null, [car, hotspot])
 
   if (!car) return <Navigate to="/garage" replace />
 
   const pickColour = (hex: string) => (entry ? update(car.id, { colour: hex }) : setLocalColour(hex))
-  const switchMode = (m: ViewMode) => {
-    setMode(m)
-    setHotspot(null)
-  }
-  const currentMode = MODES.find((m) => m.key === mode)!
 
   const tiles = [
     { label: 'Power', value: `${car.powerHp}`, unit: 'hp' },
@@ -86,38 +74,36 @@ export default function CarPage() {
         </div>
 
         {/* Stage: modes, viewer, facts */}
-        <div className="mt-6 grid gap-5 lg:grid-cols-[150px_minmax(0,1fr)_300px]">
-          <nav aria-label="View" className="flex gap-2 lg:flex-col lg:pt-10">
-            {MODES.map(({ key, label, icon: Icon }) => (
-              <button
-                key={key}
-                type="button"
-                onClick={() => switchMode(key)}
-                aria-pressed={mode === key}
-                className={cn(
-                  'flex h-11 flex-1 items-center justify-center gap-2 rounded-full border px-4 text-[13px] font-medium transition-colors duration-300 lg:flex-none lg:justify-start',
-                  mode === key ? 'border-ivory bg-ivory text-ink' : 'border-line-strong text-smoke hover:text-ivory',
-                )}
-              >
-                <Icon className="size-4" strokeWidth={1.75} />
-                {label}
-              </button>
-            ))}
-          </nav>
-
+        <div className="mt-6 grid gap-5 lg:grid-cols-[minmax(0,1fr)_300px]">
           <div className="relative">
-            <div className="relative h-[52vh] min-h-[340px] w-full md:h-[60vh]">
-              <CarViewer car={car} colour={colour} mode={mode} activeHotspot={hotspot} onHotspot={setHotspot} className="!absolute inset-0" />
+            <div className="relative h-[44vh] min-h-[300px] w-full md:h-[64vh]">
+              <CarViewer car={car} colour={colour} activeHotspot={hotspot} onHotspot={setHotspot} className="!absolute inset-0" />
             </div>
-            <p className="pointer-events-none mt-2 flex items-center justify-center gap-2 text-center text-[13px] text-smoke">
+            <div role="group" aria-label="Features" className="mt-3 flex flex-wrap justify-center gap-2">
+              {car.hotspots.map((h) => (
+                <button
+                  key={h.id}
+                  type="button"
+                  aria-pressed={hotspot === h.id}
+                  onClick={() => setHotspot(hotspot === h.id ? null : h.id)}
+                  className={cn(
+                    'h-9 rounded-full border px-4 text-[13px] transition-colors duration-300',
+                    hotspot === h.id ? 'border-teal bg-teal text-ink' : 'border-line-strong text-smoke hover:text-ivory',
+                  )}
+                >
+                  {h.label}
+                </button>
+              ))}
+            </div>
+            <p className="pointer-events-none mt-3 flex items-center justify-center gap-2 text-center text-[13px] text-smoke">
               <Hand className="size-3.5" strokeWidth={1.75} aria-hidden />
-              {currentMode.hint}
+              Drag to walk around the car. Scroll or pinch to zoom.
             </p>
           </div>
 
           <aside className="flex flex-col gap-4 lg:pt-10">
             <div className="rounded-[24px] bg-ivory p-6 text-ink">
-              <p className="text-[13px] text-ink/60">{active ? currentMode.label : 'Did you know'}</p>
+              <p className="text-[13px] text-ink/60">{active ? 'Up close' : 'Did you know'}</p>
               <h2 className="type-display mt-2 text-[26px] leading-tight">{active ? active.label : car.tagline}</h2>
               <p className="mt-3 text-[14px] leading-relaxed text-ink/75">{active ? active.detail : car.facts[factIndex]}</p>
               {!active && (

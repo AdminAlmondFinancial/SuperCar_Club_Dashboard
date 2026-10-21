@@ -172,7 +172,7 @@ export default function GaragePage() {
           <div>
             <h1 className="type-display text-[clamp(2.75rem,6vw,5rem)] text-ivory">Your garage</h1>
             <p className="mt-3 max-w-[52ch] text-[17px] text-smoke">
-              Keep up to two cars here. Open one to walk around it, sit inside or look at the engine.
+              Keep up to two cars here. Open one to walk all the way around it in 3D.
             </p>
           </div>
           <p className="type-spec text-sm text-smoke">
