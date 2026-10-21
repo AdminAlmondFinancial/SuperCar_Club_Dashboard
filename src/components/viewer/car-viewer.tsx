@@ -21,8 +21,8 @@ type ScanModel = {
 
 const MODELS: Record<string, ScanModel> = {
   'ferrari-458-italia': { file: 'ferrari-458' },
-  'ferrari-amalfi': { file: 'ferrari-amalfi', keyed: true, flip: true },
-  'porsche-911-gt3-rs': { file: 'porsche-911-gt3-rs', keyed: true },
+  'ferrari-amalfi': { file: 'ferrari-amalfi', keyed: true },
+  'porsche-911-gt3-rs': { file: 'porsche-911-gt3-rs', keyed: true, flip: true },
   'lamborghini-revuelto': { file: 'lamborghini-revuelto', keyed: true },
   'mclaren-750s': { file: 'mclaren-750s', keyed: true },
   'aston-martin-vanquish': { file: 'aston-martin-vanquish', keyed: true },
@@ -40,16 +40,17 @@ const modelUrls = new Map<string, Promise<string>>()
  * a script that stores the model as a blob URL in window.__GLB.
  */
 function modelUrl(file: string) {
-  if (!import.meta.env.VITE_EMBED_MODELS) return Promise.resolve(asset(`models/${file}.glb`))
   let p = modelUrls.get(file)
   if (!p) {
-    p = new Promise<string>((resolve, reject) => {
-      const s = document.createElement('script')
-      s.src = asset(`models/${file}.js`)
-      s.onload = () => resolve((window as GlbWindow).__GLB![file])
-      s.onerror = reject
-      document.head.append(s)
-    })
+    p = import.meta.env.VITE_EMBED_MODELS
+      ? new Promise<string>((resolve, reject) => {
+          const s = document.createElement('script')
+          s.src = asset(`models/${file}.js`)
+          s.onload = () => resolve((window as GlbWindow).__GLB![file])
+          s.onerror = reject
+          document.head.append(s)
+        })
+      : Promise.resolve(asset(`models/${file}.glb`))
     modelUrls.set(file, p)
   }
   return p
