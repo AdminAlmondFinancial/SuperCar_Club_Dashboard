@@ -1,6 +1,6 @@
 import { CameraControls, ContactShadows, Environment, Html, Lightformer, useGLTF } from '@react-three/drei'
 import { Canvas, useThree } from '@react-three/fiber'
-import { Suspense, useEffect, useMemo, useRef } from 'react'
+import { Suspense, use, useEffect, useMemo, useRef } from 'react'
 import * as THREE from 'three'
 
 import type { Car, Hotspot } from '@/data/cars'
@@ -9,9 +9,91 @@ import { cn } from '@/lib/utils'
 
 import { buildCar, layoutFor, type CarLayout } from './procedural/car-geometry'
 
-/** Cars with a detailed, openly licensed scan instead of the stylised body. */
-const MODELS: Record<string, string> = {
-  'ferrari-458-italia': asset('models/ferrari-458.glb'),
+/** The 458 is an openly licensed scan; the rest were generated from studio images in Higgsfield (Tripo H3.1). */
+type ScanModel = {
+  /** File name in public/models, without the extension. */
+  file: string
+  /** Body painted in the reference cobalt (#1f4fd1) and recoloured by keying that hue, instead of a named paint material. */
+  keyed?: boolean
+  /** Turn the scan half a revolution so its nose points along +x. */
+  flip?: boolean
+}
+
+const MODELS: Record<string, ScanModel> = {
+  'ferrari-458-italia': { file: 'ferrari-458' },
+  'ferrari-amalfi': { file: 'ferrari-amalfi', keyed: true, flip: true },
+  'porsche-911-gt3-rs': { file: 'porsche-911-gt3-rs', keyed: true },
+  'lamborghini-revuelto': { file: 'lamborghini-revuelto', keyed: true },
+  'mclaren-750s': { file: 'mclaren-750s', keyed: true },
+  'aston-martin-vanquish': { file: 'aston-martin-vanquish', keyed: true },
+  'mercedes-amg-g63': { file: 'mercedes-amg-g63', keyed: true },
+  'rolls-royce-spectre': { file: 'rolls-royce-spectre', keyed: true },
+  'bentley-continental-gt-speed': { file: 'bentley-continental-gt-speed', keyed: true },
+  'bugatti-chiron-super-sport': { file: 'bugatti-chiron-super-sport', keyed: true },
+}
+
+type GlbWindow = Window & { __GLB?: Record<string, string> }
+const modelUrls = new Map<string, Promise<string>>()
+
+/**
+ * Hosts that cannot serve .glb files (a VITE_EMBED_MODELS build) get each model as models/<file>.js,
+ * a script that stores the model as a blob URL in window.__GLB.
+ */
+function modelUrl(file: string) {
+  if (!import.meta.env.VITE_EMBED_MODELS) return Promise.resolve(asset(`models/${file}.glb`))
+  let p = modelUrls.get(file)
+  if (!p) {
+    p = new Promise<string>((resolve, reject) => {
+      const s = document.createElement('script')
+      s.src = asset(`models/${file}.js`)
+      s.onload = () => resolve((window as GlbWindow).__GLB![file])
+      s.onerror = reject
+      document.head.append(s)
+    })
+    modelUrls.set(file, p)
+  }
+  return p
+}
+
+/**
+ * Swaps the reference cobalt in a scan's colour texture for the chosen paint, keeping the texture's shading,
+ * and gives those texels a glossy clear coat.
+ */
+function keyedPaint(src: THREE.MeshStandardMaterial, colour: string) {
+  const mat = new THREE.MeshPhysicalMaterial({
+    map: src.map,
+    // The generated normal map adds ripples to the panels; the mesh normals read cleaner.
+    normalMap: null,
+    roughnessMap: src.roughnessMap,
+    metalnessMap: src.metalnessMap,
+    roughness: 1,
+    metalness: 1,
+    clearcoat: 1,
+    clearcoatRoughness: 0.06,
+  })
+  const paint = { value: new THREE.Color(colour) }
+  mat.onBeforeCompile = (shader) => {
+    shader.uniforms.uPaint = paint
+    shader.fragmentShader = shader.fragmentShader
+      .replace('void main() {', 'uniform vec3 uPaint;\nfloat paintKey = 0.0;\nvoid main() {')
+      .replace(
+        '#include <map_fragment>',
+        `#include <map_fragment>
+        {
+          vec3 t = sampledDiffuseColor.rgb;
+          float hi = max(t.r, t.g);
+          // Strongly blue texels are body paint; the ratio test leaves grey glass and black trim alone.
+          paintKey = smoothstep(0.04, 0.12, t.b - hi) * smoothstep(0.45, 0.7, (t.b - hi) / max(t.b, 1e-3));
+          // Keep only part of the baked shading, which otherwise shows the scan's ripples.
+          vec3 painted = uPaint * mix(1.0, clamp(t.b / 0.637, 0.15, 1.4), 0.45);
+          diffuseColor.rgb = mix(diffuseColor.rgb, painted, paintKey);
+        }`,
+      )
+      .replace('#include <roughnessmap_fragment>', '#include <roughnessmap_fragment>\nroughnessFactor = mix(roughnessFactor, 0.32, paintKey);')
+      .replace('#include <metalnessmap_fragment>', '#include <metalnessmap_fragment>\nmetalnessFactor = mix(metalnessFactor, 0.3, paintKey);')
+      .replace('#include <clearcoat_fragment_maps>', '#include <clearcoat_fragment_maps>\nmaterial.clearcoat *= paintKey;')
+  }
+  return { mat, paint: paint.value }
 }
 
 // ---------------------------------------------------------------------------
@@ -24,19 +106,24 @@ function ProceduralCar({ car, colour }: { car: Car; colour: string }) {
   return <primitive object={built.root} />
 }
 
-function ScannedCar({ url, colour, lay }: { url: string; colour: string; lay: CarLayout }) {
-  const gltf = useGLTF(url, asset('draco/'))
+function ScannedCar({ model, colour, lay }: { model: ScanModel; colour: string; lay: CarLayout }) {
+  const gltf = useGLTF(use(modelUrl(model.file)), asset('draco/'))
   const { scene, paint } = useMemo(() => {
     const scene = gltf.scene.clone(true)
-    let paint: THREE.MeshPhysicalMaterial | null = null
+    let paint: THREE.Color | null = null
     scene.traverse((o) => {
       const mesh = o as THREE.Mesh
       if (!mesh.isMesh) return
       mesh.castShadow = true
       const m = mesh.material as THREE.MeshStandardMaterial
-      if (m.name === 'Body_Color') {
-        paint ??= new THREE.MeshPhysicalMaterial({ color: colour, metalness: 0.6, roughness: 0.3, clearcoat: 1, clearcoatRoughness: 0.05 })
-        mesh.material = paint
+      if (model.keyed) {
+        const k = keyedPaint(m, colour)
+        mesh.material = k.mat
+        paint = k.paint
+      } else if (m.name === 'Body_Color') {
+        const mat = new THREE.MeshPhysicalMaterial({ color: colour, metalness: 0.6, roughness: 0.3, clearcoat: 1, clearcoatRoughness: 0.05 })
+        mesh.material = mat
+        paint ??= mat.color
       } else if (m.name === 'Glass_Gray') {
         mesh.material = new THREE.MeshPhysicalMaterial({ color: '#0b0f10', metalness: 0.2, roughness: 0.05, transparent: true, opacity: 0.5, depthWrite: false })
       } else {
@@ -49,15 +136,16 @@ function ScannedCar({ url, colour, lay }: { url: string; colour: string; lay: Ca
     const wrap = new THREE.Group()
     wrap.add(scene)
     if (size.z > size.x) wrap.rotation.y = -Math.PI / 2
+    if (model.flip) wrap.rotation.y += Math.PI
     const s = lay.L / Math.max(size.x, size.z)
     scene.scale.setScalar(s)
     const centre = box.getCenter(new THREE.Vector3()).multiplyScalar(s)
     scene.position.set(-centre.x, -box.min.y * s, -centre.z)
-    return { scene: wrap, paint: paint as THREE.MeshPhysicalMaterial | null }
-  }, [gltf, lay]) // eslint-disable-line react-hooks/exhaustive-deps
+    return { scene: wrap, paint: paint as THREE.Color | null }
+  }, [gltf, lay, model]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    paint?.color.set(colour)
+    paint?.set(colour)
   }, [paint, colour])
   return <primitive object={scene} />
 }
@@ -203,7 +291,7 @@ export type CarViewerProps = {
 export function CarViewer({ car, colour, showHotspots = true, activeHotspot = null, onHotspot, still, azimuth, className }: CarViewerProps) {
   const lay = useMemo(() => layoutFor(car), [car])
   const pins = useMemo(() => spread(placeHotspots(car, lay)), [car, lay])
-  const modelUrl = MODELS[car.id]
+  const model = MODELS[car.id]
 
   return (
     <Canvas
@@ -218,7 +306,7 @@ export function CarViewer({ car, colour, showHotspots = true, activeHotspot = nu
     >
       <Suspense fallback={null}>
         <Studio floor={!still} />
-        {modelUrl ? <ScannedCar url={modelUrl} colour={colour} lay={lay} /> : <ProceduralCar car={car} colour={colour} />}
+        {model ? <ScannedCar model={model} colour={colour} lay={lay} /> : <ProceduralCar car={car} colour={colour} />}
         {showHotspots && !still && <Pins pins={pins} active={activeHotspot} onSelect={(id) => onHotspot?.(id)} />}
       </Suspense>
       <Rig lay={lay} still={still} azimuth={azimuth} />
