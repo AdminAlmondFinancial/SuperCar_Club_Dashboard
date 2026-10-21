@@ -10,8 +10,56 @@ import { cn } from '@/lib/utils'
 import { buildCar, layoutFor, type CarLayout } from './procedural/car-geometry'
 
 /** Cars with a detailed, openly licensed scan instead of the stylised body. */
-const MODELS: Record<string, string> = {
-  'ferrari-458-italia': asset('models/ferrari-458.glb'),
+type ScanModel = {
+  url: string
+  /** Body painted in the reference cobalt (#1f4fd1) and recoloured by keying that hue, instead of a named paint material. */
+  keyed?: boolean
+  /** Turn the scan half a revolution so its nose points along +x. */
+  flip?: boolean
+}
+
+const MODELS: Record<string, ScanModel> = {
+  'ferrari-458-italia': { url: asset('models/ferrari-458.glb') },
+  'lamborghini-revuelto': { url: asset('models/lamborghini-revuelto.glb'), keyed: true },
+}
+
+/**
+ * Swaps the reference cobalt in a scan's colour texture for the chosen paint, keeping the texture's shading,
+ * and gives those texels a glossy clear coat.
+ */
+function keyedPaint(src: THREE.MeshStandardMaterial, colour: string) {
+  const mat = new THREE.MeshPhysicalMaterial({
+    map: src.map,
+    normalMap: src.normalMap,
+    roughnessMap: src.roughnessMap,
+    metalnessMap: src.metalnessMap,
+    roughness: 1,
+    metalness: 1,
+    clearcoat: 1,
+    clearcoatRoughness: 0.06,
+  })
+  const paint = { value: new THREE.Color(colour) }
+  mat.onBeforeCompile = (shader) => {
+    shader.uniforms.uPaint = paint
+    shader.fragmentShader = shader.fragmentShader
+      .replace('void main() {', 'uniform vec3 uPaint;\nfloat paintKey = 0.0;\nvoid main() {')
+      .replace(
+        '#include <map_fragment>',
+        `#include <map_fragment>
+        {
+          vec3 t = sampledDiffuseColor.rgb;
+          float hi = max(t.r, t.g);
+          // Strongly blue texels are body paint; the ratio test leaves grey glass and black trim alone.
+          paintKey = smoothstep(0.04, 0.12, t.b - hi) * smoothstep(0.45, 0.7, (t.b - hi) / max(t.b, 1e-3));
+          vec3 painted = uPaint * clamp(t.b / 0.637, 0.15, 1.4);
+          diffuseColor.rgb = mix(diffuseColor.rgb, painted, paintKey);
+        }`,
+      )
+      .replace('#include <roughnessmap_fragment>', '#include <roughnessmap_fragment>\nroughnessFactor = mix(roughnessFactor, 0.32, paintKey);')
+      .replace('#include <metalnessmap_fragment>', '#include <metalnessmap_fragment>\nmetalnessFactor = mix(metalnessFactor, 0.55, paintKey);')
+      .replace('#include <clearcoat_fragment_maps>', '#include <clearcoat_fragment_maps>\nmaterial.clearcoat *= paintKey;')
+  }
+  return { mat, paint: paint.value }
 }
 
 // ---------------------------------------------------------------------------
@@ -24,19 +72,24 @@ function ProceduralCar({ car, colour }: { car: Car; colour: string }) {
   return <primitive object={built.root} />
 }
 
-function ScannedCar({ url, colour, lay }: { url: string; colour: string; lay: CarLayout }) {
-  const gltf = useGLTF(url, asset('draco/'))
+function ScannedCar({ model, colour, lay }: { model: ScanModel; colour: string; lay: CarLayout }) {
+  const gltf = useGLTF(model.url, asset('draco/'))
   const { scene, paint } = useMemo(() => {
     const scene = gltf.scene.clone(true)
-    let paint: THREE.MeshPhysicalMaterial | null = null
+    let paint: THREE.Color | null = null
     scene.traverse((o) => {
       const mesh = o as THREE.Mesh
       if (!mesh.isMesh) return
       mesh.castShadow = true
       const m = mesh.material as THREE.MeshStandardMaterial
-      if (m.name === 'Body_Color') {
-        paint ??= new THREE.MeshPhysicalMaterial({ color: colour, metalness: 0.6, roughness: 0.3, clearcoat: 1, clearcoatRoughness: 0.05 })
-        mesh.material = paint
+      if (model.keyed) {
+        const k = keyedPaint(m, colour)
+        mesh.material = k.mat
+        paint = k.paint
+      } else if (m.name === 'Body_Color') {
+        const mat = new THREE.MeshPhysicalMaterial({ color: colour, metalness: 0.6, roughness: 0.3, clearcoat: 1, clearcoatRoughness: 0.05 })
+        mesh.material = mat
+        paint ??= mat.color
       } else if (m.name === 'Glass_Gray') {
         mesh.material = new THREE.MeshPhysicalMaterial({ color: '#0b0f10', metalness: 0.2, roughness: 0.05, transparent: true, opacity: 0.5, depthWrite: false })
       } else {
@@ -49,15 +102,16 @@ function ScannedCar({ url, colour, lay }: { url: string; colour: string; lay: Ca
     const wrap = new THREE.Group()
     wrap.add(scene)
     if (size.z > size.x) wrap.rotation.y = -Math.PI / 2
+    if (model.flip) wrap.rotation.y += Math.PI
     const s = lay.L / Math.max(size.x, size.z)
     scene.scale.setScalar(s)
     const centre = box.getCenter(new THREE.Vector3()).multiplyScalar(s)
     scene.position.set(-centre.x, -box.min.y * s, -centre.z)
-    return { scene: wrap, paint: paint as THREE.MeshPhysicalMaterial | null }
-  }, [gltf, lay]) // eslint-disable-line react-hooks/exhaustive-deps
+    return { scene: wrap, paint: paint as THREE.Color | null }
+  }, [gltf, lay, model]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    paint?.color.set(colour)
+    paint?.set(colour)
   }, [paint, colour])
   return <primitive object={scene} />
 }
@@ -203,7 +257,7 @@ export type CarViewerProps = {
 export function CarViewer({ car, colour, showHotspots = true, activeHotspot = null, onHotspot, still, azimuth, className }: CarViewerProps) {
   const lay = useMemo(() => layoutFor(car), [car])
   const pins = useMemo(() => spread(placeHotspots(car, lay)), [car, lay])
-  const modelUrl = MODELS[car.id]
+  const model = MODELS[car.id]
 
   return (
     <Canvas
@@ -218,7 +272,7 @@ export function CarViewer({ car, colour, showHotspots = true, activeHotspot = nu
     >
       <Suspense fallback={null}>
         <Studio floor={!still} />
-        {modelUrl ? <ScannedCar url={modelUrl} colour={colour} lay={lay} /> : <ProceduralCar car={car} colour={colour} />}
+        {model ? <ScannedCar model={model} colour={colour} lay={lay} /> : <ProceduralCar car={car} colour={colour} />}
         {showHotspots && !still && <Pins pins={pins} active={activeHotspot} onSelect={(id) => onHotspot?.(id)} />}
       </Suspense>
       <Rig lay={lay} still={still} azimuth={azimuth} />
