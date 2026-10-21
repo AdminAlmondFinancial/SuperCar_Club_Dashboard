@@ -58,6 +58,7 @@ export function HeroScrub({
   const cardRef = useRef<HTMLDivElement>(null);
   const titleTopRef = useRef<HTMLHeadingElement>(null);
   const titleBottomRef = useRef<HTMLHeadingElement>(null);
+  const actionRef = useRef<HTMLDivElement>(null);
 
   const [ready, setReady] = useState(false);
   const [framesOk, setFramesOk] = useState(true);
@@ -153,8 +154,8 @@ export function HeroScrub({
       const immerseScale = () => {
         const vw = window.innerWidth;
         const vh = window.innerHeight;
-        const baseW = Math.min(vw * 0.96, vh * 0.72 * aspect);
-        const baseH = Math.min(vh * 0.72, (vw * 0.96) / aspect);
+        const baseW = Math.min(vw * 0.96, vh * 0.58 * aspect);
+        const baseH = Math.min(vh * 0.58, (vw * 0.96) / aspect);
         if (baseW <= 0 || baseH <= 0) return 1.5;
         return Math.max(vw / baseW, vh / baseH) * IMMERSE_OVERFILL;
       };
@@ -220,6 +221,10 @@ export function HeroScrub({
       master.to(cardRef.current, { scale: immerseScale(), ease: "power2.in", duration: 0.63 }, 0.15);
       master.to(titleTopRef.current, { opacity: 0, ease: "power1.in", duration: 0.22 }, 0.15);
       master.to(titleBottomRef.current, { opacity: 0, ease: "power1.in", duration: 0.22 }, 0.15);
+      if (actionRef.current) {
+        master.to(actionRef.current, { opacity: 0, ease: "power1.in", duration: 0.1 }, 0.15);
+        master.to(actionRef.current, { opacity: 1, ease: "power2.out", duration: 0.2 }, 0.8);
+      }
 
       master.to(cardRef.current, { scale: startScale(), ease: "power3.inOut", duration: 0.22 }, 0.78);
       master.to(titleTopRef.current, {
@@ -235,7 +240,7 @@ export function HeroScrub({
     return () => ctx.revert();
   }, [ready, framesOk, reduced, aspect, frameCount]);
 
-  const titleStyle = { fontSize: "clamp(3rem, 9vw, 8rem)", lineHeight: 0.9, letterSpacing: "-0.015em" };
+  const titleStyle = { fontSize: "clamp(3rem, 8vw, 6.5rem)", lineHeight: 0.9, letterSpacing: "-0.015em" };
 
   // With reduced motion there is no scrubbing: one still frame, the titles and the action.
   if (reduced) {
@@ -281,8 +286,8 @@ export function HeroScrub({
           <h2 ref={titleTopRef} aria-hidden className="type-display" style={titleStyle}>{titleTop}</h2>
 
           <div ref={cardRef} className="relative overflow-hidden rounded-[12px] shadow-[0_20px_80px_rgba(0,0,0,0.55)] ring-1 ring-white/10 will-change-transform md:rounded-[16px]" style={{
-            width: `min(96vw, calc(72svh * ${aspect}))`,
-            height: `min(72svh, 96vw / ${aspect})`,
+            width: `min(96vw, calc(58svh * ${aspect}))`,
+            height: `min(58svh, 96vw / ${aspect})`,
             aspectRatio: aspect,
           }}>
             <div aria-hidden className="pointer-events-none absolute inset-0 z-20 shadow-[inset_0_0_120px_rgba(0,0,0,0.45)]" />
@@ -292,7 +297,7 @@ export function HeroScrub({
           </div>
 
           <h2 ref={titleBottomRef} aria-hidden className="type-display" style={titleStyle}>{titleBottom}</h2>
-          {action && <div className="absolute bottom-[calc(6rem+env(safe-area-inset-bottom))] md:bottom-10">{action}</div>}
+          {action && <div ref={actionRef} className="mt-2 md:mt-4">{action}</div>}
         </div>
       </div>
     </section>

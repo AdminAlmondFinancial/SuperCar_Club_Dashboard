@@ -53,7 +53,7 @@ export function AppShell() {
     <div className="min-h-dvh bg-ink">
       <header
         className={cn(
-          'fixed inset-x-0 top-0 z-50 border-b transition-[background-color,border-color] duration-500',
+          'fixed inset-x-0 top-0 z-50 border-b transition-[background-color,border-color] duration-300',
           scrolled ? 'border-line bg-black/75 backdrop-blur-xl' : 'border-transparent',
         )}
       >
