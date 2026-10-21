@@ -46,4 +46,4 @@ Specs, prices and service intervals are approximate and should be checked agains
 
 ## The home page hero
 
-The scroll animation uses the image frames from the `hero-scrub` component's demo, loaded from `raw.githubusercontent.com/duthiljean/ferrari-hero-demo`. They belong to that repository and are not included here. To use your own, export a sequence of WebP frames into `public/hero/` and change `frameUrl` in `src/pages/home.tsx`.
+The scroll animation uses the image frames from the `hero-scrub` component's demo, loaded from `raw.githubusercontent.com/duthiljean/ferrari-hero-demo`. They belong to that repository and are not included here. `public/hero/` holds our own 120-frame turntable of the Ferrari 458 Spider, rendered from the 3D viewer; build with `VITE_HERO_LOCAL=1` to use it instead. `VITE_HASH_ROUTER=1` switches to hash routes for static hosting without the Worker.

@@ -3,6 +3,7 @@ import { Navigate, useSearchParams } from 'react-router-dom'
 
 import { Wordmark } from '@/components/layout/crest'
 import { Button } from '@/components/ui/button'
+import { asset } from '@/lib/asset'
 import { useAuth } from '@/lib/auth'
 
 function GoogleGlyph() {
@@ -88,7 +89,7 @@ export function SignInPage() {
 
       <section aria-hidden className="relative hidden lg:block">
         <img
-          src="/renders/ferrari-458-italia.webp"
+          src={asset('renders/ferrari-458-italia.webp')}
           alt=""
           className="absolute inset-0 m-auto w-[88%] max-w-[900px] object-contain drop-shadow-[0_40px_60px_rgba(0,0,0,0.7)]"
           onError={(e) => (e.currentTarget.style.display = 'none')}

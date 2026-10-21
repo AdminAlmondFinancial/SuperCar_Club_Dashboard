@@ -1,5 +1,6 @@
 import { useState } from 'react'
 
+import { asset } from '@/lib/asset'
 import { cn } from '@/lib/utils'
 
 export function CarSilhouette({ colour, className }: { colour: string; className?: string }) {
@@ -37,7 +38,7 @@ export function CarImage({ carId, colour, alt, className }: { carId: string; col
   if (failed) return <CarSilhouette colour={colour} className={className} />
   return (
     <img
-      src={`/renders/${carId}.webp`}
+      src={asset(`renders/${carId}.webp`)}
       alt={alt}
       loading="lazy"
       onError={() => setFailed(true)}

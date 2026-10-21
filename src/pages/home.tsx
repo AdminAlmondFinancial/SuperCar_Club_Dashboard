@@ -6,15 +6,24 @@ import { ClubGarages } from '@/components/home/club-garages'
 import { HomeFooter } from '@/components/home/home-footer'
 import { upcomingEvents } from '@/components/home/dates'
 import { SteeringWheel, KeyFob } from '@/components/memorabilia'
+import { asset } from '@/lib/asset'
 
-const frameUrl = (i: number) =>
-  `https://raw.githubusercontent.com/duthiljean/ferrari-hero-demo/main/${String(i + 1).padStart(4, '0')}.webp`
+// VITE_HERO_LOCAL uses our own 458 Spider turntable frames from public/hero instead of the demo's hosted ones.
+const LOCAL_HERO = !!import.meta.env.VITE_HERO_LOCAL
+const hero = LOCAL_HERO
+  ? { frameCount: 120, titleBottom: '458 Spider', frameUrl: (i: number) => asset(`hero/${String(i + 1).padStart(4, '0')}.webp`) }
+  : {
+      frameCount: 300,
+      titleBottom: 'Amalfi',
+      frameUrl: (i: number) =>
+        `https://raw.githubusercontent.com/duthiljean/ferrari-hero-demo/main/${String(i + 1).padStart(4, '0')}.webp`,
+    }
 
 export function HomePage() {
   const upcoming = upcomingEvents()
   return (
     <div>
-      <HeroScrub frameCount={300} frameUrl={frameUrl} titleTop="Ferrari" titleBottom="Amalfi" accentHex="#3a9b8a" />
+      <HeroScrub frameCount={hero.frameCount} frameUrl={hero.frameUrl} titleTop="Ferrari" titleBottom={hero.titleBottom} accentHex="#3a9b8a" />
       <WelcomeBand />
       <div className="relative overflow-hidden">
         <SteeringWheel className="pointer-events-none absolute -left-24 top-[55%] hidden h-80 w-80 text-champagne opacity-[0.12] lg:block" />

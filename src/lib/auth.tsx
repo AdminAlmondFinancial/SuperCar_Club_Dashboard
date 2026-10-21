@@ -45,13 +45,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .then(async (res) => {
         if (cancelled) return
         const isJson = res.headers.get('content-type')?.includes('application/json')
-        if (!isJson) {
+        if (!isJson || !res.ok) {
           // No Worker behind us: fall back to a local preview session.
           setPreviewMode(true)
           setMember(readPreviewMember())
           return
         }
-        setMember(res.ok ? ((await res.json()) as { member: Member | null }).member : null)
+        setMember(((await res.json()) as { member: Member | null }).member)
       })
       .catch(() => {
         if (cancelled) return

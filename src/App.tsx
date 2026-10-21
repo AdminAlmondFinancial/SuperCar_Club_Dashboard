@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react'
-import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, HashRouter, Route, Routes } from 'react-router-dom'
 
 import { AppShell } from '@/components/layout/app-shell'
 import { RequireMember } from '@/components/layout/require-member'
@@ -15,11 +15,14 @@ const GaragePage = lazy(() => import('@/pages/garage'))
 const CarPage = lazy(() => import('@/pages/car'))
 const StudioPage = lazy(() => import('@/pages/studio'))
 
+// A static preview (no Worker, opened from a sub-folder) uses hash URLs so every page loads.
+const Router = import.meta.env.VITE_HASH_ROUTER ? HashRouter : BrowserRouter
+
 export default function App() {
   return (
     <AuthProvider>
       <GarageProvider>
-        <BrowserRouter>
+        <Router>
           <Suspense fallback={<div className="min-h-dvh bg-ink" />}>
             <Routes>
               <Route path="/sign-in" element={<SignInPage />} />
@@ -35,7 +38,7 @@ export default function App() {
               </Route>
             </Routes>
           </Suspense>
-        </BrowserRouter>
+        </Router>
       </GarageProvider>
     </AuthProvider>
   )

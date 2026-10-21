@@ -4,13 +4,14 @@ import { Suspense, useEffect, useMemo, useRef } from 'react'
 import * as THREE from 'three'
 
 import type { Car, Hotspot } from '@/data/cars'
+import { asset } from '@/lib/asset'
 import { cn } from '@/lib/utils'
 
 import { buildCar, layoutFor, type CarLayout } from './procedural/car-geometry'
 
 /** Cars with a detailed, openly licensed scan instead of the stylised body. */
 const MODELS: Record<string, string> = {
-  'ferrari-458-italia': '/models/ferrari-458.glb',
+  'ferrari-458-italia': asset('models/ferrari-458.glb'),
 }
 
 // ---------------------------------------------------------------------------
@@ -24,7 +25,7 @@ function ProceduralCar({ car, colour }: { car: Car; colour: string }) {
 }
 
 function ScannedCar({ url, colour, lay }: { url: string; colour: string; lay: CarLayout }) {
-  const gltf = useGLTF(url, '/draco/')
+  const gltf = useGLTF(url, asset('draco/'))
   const { scene, paint } = useMemo(() => {
     const scene = gltf.scene.clone(true)
     let paint: THREE.MeshPhysicalMaterial | null = null
@@ -162,7 +163,7 @@ function Pins({ pins, active, onSelect }: { pins: HotspotPin[]; active: string |
 
 // ---------------------------------------------------------------------------
 
-function Rig({ lay, still }: { lay: CarLayout; still?: boolean }) {
+function Rig({ lay, still, azimuth }: { lay: CarLayout; still?: boolean; azimuth?: number }) {
   const ref = useRef<CameraControls>(null)
   const aspect = useThree((s) => s.size.width / Math.max(1, s.size.height))
   useEffect(() => {
@@ -174,8 +175,14 @@ function Rig({ lay, still }: { lay: CarLayout; still?: boolean }) {
     c.maxDistance = lay.L * 2.6 * k
     c.minPolarAngle = 0.15
     c.maxPolarAngle = Math.PI / 2 - 0.04
+    if (azimuth !== undefined) {
+      // Studio turntable: orbit at a fixed height and distance.
+      const r = lay.L * 1.57 * k
+      void c.setLookAt(Math.cos(azimuth) * r, lay.H * 1.05 * k, Math.sin(azimuth) * r, 0, lay.H * 0.42, 0, false)
+      return
+    }
     void c.setLookAt(lay.L * 0.95 * k, lay.H * 1.05 * k, lay.L * 1.25 * k, 0, lay.H * 0.42, 0, !still)
-  }, [lay, still, aspect])
+  }, [lay, still, aspect, azimuth])
   return <CameraControls ref={ref} makeDefault smoothTime={0.6} draggingSmoothTime={0.12} />
 }
 
@@ -187,10 +194,12 @@ export type CarViewerProps = {
   onHotspot?: (id: string | null) => void
   /** Studio renders: no pins, no transitions, buffer kept for screenshots. */
   still?: boolean
+  /** Studio turntable angle in radians. */
+  azimuth?: number
   className?: string
 }
 
-export function CarViewer({ car, colour, showHotspots = true, activeHotspot = null, onHotspot, still, className }: CarViewerProps) {
+export function CarViewer({ car, colour, showHotspots = true, activeHotspot = null, onHotspot, still, azimuth, className }: CarViewerProps) {
   const lay = useMemo(() => layoutFor(car), [car])
   const pins = useMemo(() => spread(placeHotspots(car, lay)), [car, lay])
   const modelUrl = MODELS[car.id]
@@ -211,7 +220,7 @@ export function CarViewer({ car, colour, showHotspots = true, activeHotspot = nu
         {modelUrl ? <ScannedCar url={modelUrl} colour={colour} lay={lay} /> : <ProceduralCar car={car} colour={colour} />}
         {showHotspots && !still && <Pins pins={pins} active={activeHotspot} onSelect={(id) => onHotspot?.(id)} />}
       </Suspense>
-      <Rig lay={lay} still={still} />
+      <Rig lay={lay} still={still} azimuth={azimuth} />
     </Canvas>
   )
 }
