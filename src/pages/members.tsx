@@ -26,7 +26,7 @@ export function MembersPage() {
   return (
     <div className="relative overflow-hidden">
       <KeyFob className="pointer-events-none absolute -right-8 top-20 size-64 -rotate-12 text-champagne/10 md:right-10 md:size-96" />
-      <div className="relative mx-auto max-w-[1440px] px-4 pb-28 pt-28 md:px-8 md:pb-24">
+      <div className="relative mx-auto max-w-[1440px] pb-dock px-4 pt-28 md:px-8">
         <h1 className="type-display text-5xl md:text-7xl">Members</h1>
         <p className="mt-4 max-w-xl text-base text-smoke">
           <span className="type-spec text-ivory">{members.length}</span> drivers, from the founders to the newest keys in the club.

@@ -41,7 +41,6 @@ export function HomePage() {
         </div>
       </div>
       <HomeFooter />
-      <div className="h-24 md:hidden" aria-hidden />
     </div>
   )
 }

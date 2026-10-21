@@ -4,7 +4,7 @@ import { Wordmark } from '@/components/layout/crest'
 
 export function HomeFooter() {
   return (
-    <footer className="border-t border-line">
+    <footer className="pb-dock border-t border-line md:pb-0">
       <div className="mx-auto flex max-w-[1440px] flex-col gap-8 px-6 py-12 md:flex-row md:items-center md:justify-between md:px-10">
         <div>
           <Wordmark />

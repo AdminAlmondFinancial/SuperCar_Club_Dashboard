@@ -1,7 +1,7 @@
 {
   // Cloudflare Worker + static assets for the SuperCar Club dashboard.
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "supercar-club-dashboard",
+  "name": "the-super-car-club",
   "main": "worker/index.ts",
   "compatibility_date": "2026-09-01",
   "assets": {
@@ -14,13 +14,13 @@
   "kv_namespaces": [
     {
       "binding": "CLUB_KV",
-      // Replace with the id printed by: npx wrangler kv namespace create CLUB_KV
-      "id": "REPLACE_WITH_YOUR_KV_NAMESPACE_ID"
+      // the-super-car-club-CLUB_KV in the club's Cloudflare account
+      "id": "a93c05ac9a64490689d325a433aad96f"
     }
   ],
   "vars": {
     // The public address of the site, with no trailing slash. Used to build OAuth redirect URIs.
-    "APP_URL": "https://supercar-club-dashboard.YOUR-SUBDOMAIN.workers.dev",
+    "APP_URL": "https://the-super-car-club.YOUR-SUBDOMAIN.workers.dev",
     // Directory (tenant) used for Microsoft sign-in. "common" allows any Microsoft account.
     "MICROSOFT_TENANT": "common"
   }
