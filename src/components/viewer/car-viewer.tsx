@@ -246,30 +246,33 @@ function Pins({ pins, active, onSelect }: { pins: HotspotPin[]; active: string |
 function Rig({ lay, mode, engineBox, still }: { lay: CarLayout; mode: ViewMode; engineBox: THREE.Box3 | null; still?: boolean }) {
   const ref = useRef<CameraControls>(null)
   const camera = useThree((s) => s.camera) as THREE.PerspectiveCamera
+  const aspect = useThree((s) => s.size.width / Math.max(1, s.size.height))
   useEffect(() => {
     const c = ref.current
     if (!c) return
+    // Pull back on tall, narrow screens so the whole car still fits.
+    const k = Math.max(1, 1.6 / aspect)
     const smooth = !still
     if (mode === 'exterior') {
       camera.fov = 32
       camera.updateProjectionMatrix()
       c.minDistance = lay.L * 0.8
-      c.maxDistance = lay.L * 2.6
+      c.maxDistance = lay.L * 2.6 * k
       c.minPolarAngle = 0.15
       c.maxPolarAngle = Math.PI / 2 - 0.04
       c.azimuthRotateSpeed = c.polarRotateSpeed = 1
-      void c.setLookAt(lay.L * 0.95, lay.H * 1.05, lay.L * 1.25, 0, lay.H * 0.42, 0, smooth)
+      void c.setLookAt(lay.L * 0.95 * k, lay.H * 1.05 * k, lay.L * 1.25 * k, 0, lay.H * 0.42, 0, smooth)
     } else if (mode === 'interior') {
       camera.fov = 40
       camera.updateProjectionMatrix()
       const e = lay.eye
       c.minDistance = 1.2
-      c.maxDistance = 3.2
+      c.maxDistance = 3.2 * k
       c.minPolarAngle = 0.05
       c.maxPolarAngle = Math.PI / 2 - 0.25
       c.azimuthRotateSpeed = c.polarRotateSpeed = 1
       // Above and behind the driver's shoulder, looking down into the cockpit.
-      void c.setLookAt(e.x - 1.15, e.y + 1.05, e.z + 0.55, e.x + 0.35, e.y - 0.4, 0, smooth)
+      void c.setLookAt(e.x - 1.15 * k, e.y + 1.05 * k, e.z + 0.55 * k, e.x + 0.35, e.y - 0.4, 0, smooth)
     } else {
       camera.fov = 34
       camera.updateProjectionMatrix()
@@ -277,13 +280,13 @@ function Rig({ lay, mode, engineBox, still }: { lay: CarLayout; mode: ViewMode; 
       const centre = box.getCenter(new THREE.Vector3())
       const r = box.getSize(new THREE.Vector3()).length()
       c.minDistance = r * 0.9
-      c.maxDistance = r * 4
+      c.maxDistance = r * 4 * k
       c.minPolarAngle = 0.1
       c.maxPolarAngle = Math.PI / 2 - 0.02
       c.azimuthRotateSpeed = c.polarRotateSpeed = 1
-      void c.setLookAt(centre.x + r * 1.3, centre.y + r * 1.25, centre.z + r * 1.55, centre.x, centre.y, centre.z, smooth)
+      void c.setLookAt(centre.x + r * 1.3 * k, centre.y + r * 1.25 * k, centre.z + r * 1.55 * k, centre.x, centre.y, centre.z, smooth)
     }
-  }, [mode, lay, engineBox, camera, still])
+  }, [mode, lay, engineBox, camera, still, aspect])
   return <CameraControls ref={ref} makeDefault smoothTime={0.6} draggingSmoothTime={0.12} />
 }
 

@@ -21,7 +21,7 @@ const FILTERS = [
 
 type FilterKey = (typeof FILTERS)[number]['key']
 
-const fmtDate = (d: Date) => d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+const fmtDate = (d: Date) => d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' })
 
 function Bay({ entry, car, onRemove }: { entry: GarageEntry; car: Car; onRemove: () => void }) {
   const next = nextServiceDate(entry, car)

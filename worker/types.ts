@@ -28,6 +28,16 @@ export type Member = {
 /** What we store in KV: the public member plus bookkeeping. */
 export type StoredMember = Member & { lastSignIn: string }
 
+/** KV list metadata on each member key, read by the admin page. */
+export type MemberMeta = {
+  name: string
+  email: string
+  provider: Provider
+  memberSince: string
+  lastSignIn: string
+  carCount: number
+}
+
 /** Mirrors GarageEntry in src/lib/garage.tsx. */
 export type GarageEntry = {
   carId: string

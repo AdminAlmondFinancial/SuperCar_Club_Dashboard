@@ -1,6 +1,6 @@
 import { Bell, CalendarDays, CarFront, House, LogOut, Search, Users } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { NavLink, Outlet, useNavigate } from 'react-router-dom'
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 
 import { Wordmark } from '@/components/layout/crest'
 import { useAuth } from '@/lib/auth'
@@ -25,6 +25,17 @@ export function AppShell() {
   const { member, signOut } = useAuth()
   const navigate = useNavigate()
   const [scrolled, setScrolled] = useState(false)
+  const { pathname, hash } = useLocation()
+
+  // React Router does not scroll to #anchors, so do it here (the bell links to #service).
+  useEffect(() => {
+    if (!hash) {
+      window.scrollTo(0, 0)
+      return
+    }
+    const t = window.setTimeout(() => document.getElementById(hash.slice(1))?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60)
+    return () => window.clearTimeout(t)
+  }, [pathname, hash])
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24)

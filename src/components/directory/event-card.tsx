@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { eventKindLabel, type ClubEvent } from '@/data/events'
 import { memberById } from '@/data/members'
+import { CLUB_TIME_ZONE, fmtTime } from '@/lib/dates'
 import { cn } from '@/lib/utils'
 
 const kindVariant = { drive: 'accent', meet: 'default', track: 'champagne', social: 'default' } as const
@@ -18,17 +19,17 @@ export function DateBlock({ iso, large }: { iso: string; large?: boolean }) {
         large ? 'size-24' : 'size-[72px]',
       )}
     >
-      <span className="text-xs text-smoke">{d.toLocaleDateString('en-GB', { month: 'short', timeZone: 'UTC' })}</span>
+      <span className="text-xs text-smoke">{d.toLocaleDateString('en-GB', { month: 'short', timeZone: CLUB_TIME_ZONE })}</span>
       <span className={cn('type-spec leading-none text-ivory', large ? 'text-4xl' : 'text-2xl')}>
-        {d.toLocaleDateString('en-GB', { day: 'numeric', timeZone: 'UTC' })}
+        {d.toLocaleDateString('en-GB', { day: 'numeric', timeZone: CLUB_TIME_ZONE })}
       </span>
-      <span className="mt-0.5 text-xs text-smoke">{d.toLocaleDateString('en-GB', { weekday: 'short', timeZone: 'UTC' })}</span>
+      <span className="mt-0.5 text-xs text-smoke">{d.toLocaleDateString('en-GB', { weekday: 'short', timeZone: CLUB_TIME_ZONE })}</span>
     </div>
   )
 }
 
 function timeOf(e: ClubEvent) {
-  const f = (s: string) => new Date(s).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' })
+  const f = (s: string) => fmtTime(new Date(s))
   return e.endDate ? `${f(e.date)} to ${f(e.endDate)}` : `from ${f(e.date)}`
 }
 
@@ -65,7 +66,7 @@ function ReserveButton({ event, going, onToggle, full, size }: { event: ClubEven
   )
 }
 
-export function FeaturedEvent({ event, going, onToggle }: { event: ClubEvent; going: boolean; onToggle: () => void }) {
+export function FeaturedEvent({ event, going, onToggle, eyebrow = 'Next up' }: { event: ClubEvent; going: boolean; onToggle: () => void; eyebrow?: string }) {
   const { host, left, shown, extra, total } = useEventFacts(event, going)
   return (
     <article className="panel-feature overflow-hidden p-6 md:p-10" aria-labelledby={`ev-${event.id}`}>
@@ -74,7 +75,7 @@ export function FeaturedEvent({ event, going, onToggle }: { event: ClubEvent; go
         <DateBlock iso={event.date} large />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <Badge variant="champagne">Next up</Badge>
+            <Badge variant="champagne">{eyebrow}</Badge>
             <Badge variant={kindVariant[event.kind]}>{eventKindLabel(event.kind)}</Badge>
           </div>
           <h3 id={`ev-${event.id}`} className="type-display mt-4 text-3xl md:text-5xl">

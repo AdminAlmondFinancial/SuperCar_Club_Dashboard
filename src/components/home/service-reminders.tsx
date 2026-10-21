@@ -3,7 +3,7 @@ import { Wrench } from 'lucide-react'
 
 import { Badge } from '@/components/ui/badge'
 import { nextServiceDate, useGarage } from '@/lib/garage'
-import { daysUntil, DAY_MS, fmtDay } from './dates'
+import { daysUntilDate, DAY_MS, fmtDay } from './dates'
 
 export function ServiceReminders() {
   const { garageCars } = useGarage()
@@ -26,7 +26,7 @@ export function ServiceReminders() {
         <ul className="space-y-4">
           {garageCars.map(({ entry, car }) => {
             const due = nextServiceDate(entry, car)
-            const days = daysUntil(due, now)
+            const days = daysUntilDate(due, now)
             const start = new Date(entry.lastService).getTime()
             const progress = Math.min(1, Math.max(0, (now.getTime() - start) / (due.getTime() - start || DAY_MS)))
             const overdue = days < 0

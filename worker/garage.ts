@@ -3,8 +3,14 @@ import type { GarageEntry } from './types'
 const MAX_ENTRIES = 2
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/
 
+const DAY_MS = 86_400_000
+
 function isIsoDate(value: unknown): value is string {
-  return typeof value === 'string' && ISO_DATE.test(value) && !Number.isNaN(Date.parse(value))
+  if (typeof value !== 'string' || !ISO_DATE.test(value)) return false
+  const time = new Date(value + 'T00:00:00Z').getTime()
+  if (Number.isNaN(time) || new Date(time).toISOString().slice(0, 10) !== value) return false
+  // Allow one day of slack for time zones ahead of UTC.
+  return time <= Date.now() + DAY_MS
 }
 
 /** Returns a clean copy of the entries, or null when the input is not acceptable. Unknown keys are dropped. */

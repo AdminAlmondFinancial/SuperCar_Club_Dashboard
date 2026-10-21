@@ -1,6 +1,7 @@
 import { handleAdmin } from './admin'
 import { handleCallback, handleLogin, handleLogout, handleMe, sessionMemberId } from './auth'
 import { readGarage, validateGarage, writeGarage } from './garage'
+import { setCarCount } from './members'
 import type { Env, Provider } from './types'
 import { json } from './util'
 
@@ -31,6 +32,7 @@ async function handleGarage(request: Request, env: Env): Promise<Response> {
     const entries = validateGarage((body as { entries?: unknown } | null)?.entries)
     if (!entries) return json({ error: 'invalid_garage' }, 400)
     await writeGarage(env.CLUB_KV, id, entries)
+    await setCarCount(env.CLUB_KV, id, entries.length)
     return json({ entries })
   }
   return json({ error: 'method_not_allowed' }, 405, { allow: 'GET, PUT' })

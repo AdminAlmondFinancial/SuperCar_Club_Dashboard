@@ -1,4 +1,5 @@
-import type { Env, Member, Provider, StoredMember } from './types'
+import type { Env, Member, MemberMeta, Provider, StoredMember } from './types'
+import { countCars, putMember } from './members'
 import {
   base64UrlToText,
   cookie,
@@ -151,17 +152,19 @@ export async function handleCallback(provider: Provider, request: Request, env: 
   const memberId = `${provider}:${claims.sub}`
   const key = `member:${memberId}`
   const now = new Date().toISOString()
-  const existing = await env.CLUB_KV.get<StoredMember>(key, 'json')
+  const { value: existing, metadata } = await env.CLUB_KV.getWithMetadata<StoredMember, MemberMeta>(key, 'json')
   const member: StoredMember = {
+    ...existing,
     id: memberId,
-    name: claims.name || email.split('@')[0] || 'Member',
-    email,
-    ...(claims.picture ? { avatarUrl: claims.picture } : {}),
+    name: claims.name || existing?.name || email.split('@')[0] || 'Member',
+    email: email || existing?.email || '',
+    ...(claims.picture || existing?.avatarUrl ? { avatarUrl: claims.picture || existing?.avatarUrl } : {}),
     provider,
     memberSince: existing?.memberSince ?? now.slice(0, 10),
     lastSignIn: now,
   }
-  await env.CLUB_KV.put(key, JSON.stringify(member))
+  const carCount = metadata?.carCount ?? (await countCars(env.CLUB_KV, memberId))
+  await putMember(env.CLUB_KV, member, carCount)
 
   const session: SessionPayload = { sub: memberId, exp: Date.now() + SESSION_SECONDS * 1000 }
   const token = await signValue(session, env.SESSION_SECRET)

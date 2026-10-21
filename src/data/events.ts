@@ -156,8 +156,9 @@ export const events: ClubEvent[] = [
 
 export function upcomingEvents(from: Date = new Date()): ClubEvent[] {
   const cutoff = from.getTime()
+  // An event still in progress (before its end date) counts as upcoming.
   return events
-    .filter((event) => new Date(event.date).getTime() >= cutoff)
+    .filter((event) => new Date(event.endDate ?? event.date).getTime() >= cutoff)
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
 }
 

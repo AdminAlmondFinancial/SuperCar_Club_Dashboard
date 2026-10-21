@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react'
 import { EventRow, FeaturedEvent } from '@/components/directory/event-card'
 import { ChequeredFlag } from '@/components/memorabilia'
 import { events, upcomingEvents, type ClubEvent } from '@/data/events'
+import { fmtMonthYear } from '@/lib/dates'
 import { cn } from '@/lib/utils'
 
 const FILTERS: { key: 'all' | ClubEvent['kind']; label: string }[] = [
@@ -33,12 +34,12 @@ export function EventsPage() {
 
   const months: { label: string; items: ClubEvent[] }[] = []
   for (const e of visible.slice(1)) {
-    const label = new Date(e.date).toLocaleDateString('en-GB', { month: 'long', year: 'numeric', timeZone: 'UTC' })
+    const label = fmtMonthYear(new Date(e.date))
     const last = months[months.length - 1]
     if (last?.label === label) last.items.push(e)
     else months.push({ label, items: [e] })
   }
-  const leadMonth = lead ? new Date(lead.date).toLocaleDateString('en-GB', { month: 'long', year: 'numeric', timeZone: 'UTC' }) : ''
+  const leadMonth = lead ? fmtMonthYear(new Date(lead.date)) : ''
 
   return (
     <div className="relative overflow-hidden">

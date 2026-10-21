@@ -1,36 +1,43 @@
 import { verifyAccess } from './access'
-import type { Env, StoredMember } from './types'
-import { readGarage } from './garage'
+import type { Env, MemberMeta, StoredMember } from './types'
 import { escapeHtml } from './util'
 
 const MAX_MEMBERS = 1000
+// Worst case is one list call plus this many reads, well under the 1000 operation limit.
+const MAX_LEGACY_READS = 500
 
 type Row = { member: StoredMember; cars: number }
 
 async function loadRows(kv: KVNamespace): Promise<{ rows: Row[]; truncated: boolean }> {
-  const keys: string[] = []
+  // One list call returns up to 1000 keys with their metadata, so the page needs no per-member reads.
+  // Members saved before metadata existed are read individually, capped to stay under the KV operation limit.
+  const items: { name: string; metadata?: MemberMeta | null }[] = []
   let cursor: string | undefined
   let truncated = false
   do {
-    const page = await kv.list({ prefix: 'member:', cursor })
-    for (const k of page.keys) keys.push(k.name)
+    const page = await kv.list<MemberMeta>({ prefix: 'member:', cursor })
+    for (const k of page.keys) items.push(k)
     cursor = page.list_complete ? undefined : page.cursor
-    if (keys.length >= MAX_MEMBERS) {
-      truncated = !page.list_complete || keys.length > MAX_MEMBERS
+    if (items.length >= MAX_MEMBERS) {
+      truncated = !page.list_complete || items.length > MAX_MEMBERS
       break
     }
   } while (cursor)
 
   const rows: Row[] = []
-  for (let i = 0; i < Math.min(keys.length, MAX_MEMBERS); i += 25) {
-    const batch = await Promise.all(
-      keys.slice(i, i + 25).map(async (key) => {
-        const member = await kv.get<StoredMember>(key, 'json')
-        if (!member) return null
-        return { member, cars: (await readGarage(kv, member.id)).length }
-      }),
-    )
-    for (const r of batch) if (r) rows.push(r)
+  let legacyReads = 0
+  for (const item of items.slice(0, MAX_MEMBERS)) {
+    const m = item.metadata
+    if (m && typeof m.carCount === 'number') {
+      rows.push({
+        member: { id: item.name.slice('member:'.length), name: m.name, email: m.email, provider: m.provider, memberSince: m.memberSince, lastSignIn: m.lastSignIn },
+        cars: m.carCount,
+      })
+    } else if (legacyReads < MAX_LEGACY_READS) {
+      legacyReads++
+      const member = await kv.get<StoredMember>(item.name, 'json')
+      if (member) rows.push({ member, cars: 0 })
+    }
   }
   rows.sort((a, b) => (b.member.lastSignIn || '').localeCompare(a.member.lastSignIn || ''))
   return { rows, truncated }
