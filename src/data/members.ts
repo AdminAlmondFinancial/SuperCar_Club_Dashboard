@@ -9,7 +9,12 @@ export type ClubMember = {
   carColours: Record<string, string>
   bio: string
   drivesAttended: number
+  /** What the member shows other members. Anything left out is shown; set a field to false to hide it. */
+  visibility?: Partial<Record<'city' | 'cars' | 'drives' | 'bio', boolean>>
 }
+
+/** True unless the member has chosen to hide this part of their profile. */
+export const shows = (m: ClubMember, field: keyof NonNullable<ClubMember['visibility']>) => m.visibility?.[field] !== false
 
 export const members: ClubMember[] = [
   {

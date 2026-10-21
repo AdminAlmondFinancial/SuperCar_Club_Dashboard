@@ -4,10 +4,10 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { cars } from '@/data/cars'
-import { members } from '@/data/members'
+import { members, shows } from '@/data/members'
 import { CarImage } from './car-silhouette'
 
-const items = members.flatMap((m) =>
+const items = members.filter((m) => shows(m, 'cars')).flatMap((m) =>
   m.carIds.flatMap((carId) => {
     const car = cars.find((c) => c.id === carId)
     return car ? [{ member: m, car, colour: m.carColours[carId] ?? car.colours[0].hex }] : []
@@ -20,8 +20,8 @@ export function ClubGarages() {
   return (
     <section aria-labelledby="garages-title">
       <div className="mb-6 flex items-end justify-between gap-4">
-        <h2 id="garages-title" className="type-display text-3xl text-ivory md:text-4xl">
-          In the club's garages
+        <h2 id="garages-title" className="type-display text-[clamp(2rem,3.4vw,2.75rem)] text-ivory">
+          In the club&rsquo;s garages
         </h2>
         <div className="hidden gap-2 md:flex">
           <Button variant="outline" size="icon" aria-label="Scroll garages left" onClick={() => scroll(-1)}>
@@ -38,7 +38,7 @@ export function ClubGarages() {
       >
         {items.map(({ member, car, colour }) => (
           <li key={`${member.id}-${car.id}`} className="w-[78%] shrink-0 snap-start sm:w-[340px]">
-            <Link to={`/cars/${car.id}`} className="panel group block overflow-hidden transition-colors hover:border-line-strong">
+            <Link to={`/cars/${car.id}`} className="panel interactive group block overflow-hidden">
               <div className="field-verde grid h-44 place-items-center px-6">
                 <CarImage
                   carId={car.id}
@@ -51,8 +51,8 @@ export function ClubGarages() {
                 <p className="type-display text-2xl text-ivory">
                   {car.make} {car.model}
                 </p>
-                <p className="mt-2 text-sm text-ivory/80">{member.name}</p>
-                <p className="text-sm text-smoke">{member.city}</p>
+                <p className="mt-2 text-label text-ivory">{member.name}</p>
+                {shows(member, 'city') && <p className="text-label text-smoke">{member.city}</p>}
               </div>
             </Link>
           </li>

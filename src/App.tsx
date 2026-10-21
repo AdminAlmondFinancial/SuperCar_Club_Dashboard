@@ -6,6 +6,7 @@ import { RequireMember } from '@/components/layout/require-member'
 import { PageLoading } from '@/components/ui/page-loading'
 import { AuthProvider } from '@/lib/auth'
 import { GarageProvider } from '@/lib/garage'
+import { RsvpProvider } from '@/lib/rsvp'
 import { EventsPage } from '@/pages/events'
 import { HomePage } from '@/pages/home'
 import { MembersPage } from '@/pages/members'
@@ -23,23 +24,25 @@ export default function App() {
   return (
     <AuthProvider>
       <GarageProvider>
-        <Router>
-          <Suspense fallback={<PageLoading />}>
-            <Routes>
-              <Route path="/sign-in" element={<SignInPage />} />
-              <Route path="/studio/:carId" element={<StudioPage />} />
-              <Route element={<RequireMember />}>
-                <Route element={<AppShell />}>
-                  <Route index element={<HomePage />} />
-                  <Route path="garage" element={<GaragePage />} />
-                  <Route path="cars/:carId" element={<CarPage />} />
-                  <Route path="events" element={<EventsPage />} />
-                  <Route path="members" element={<MembersPage />} />
+        <RsvpProvider>
+          <Router>
+            <Suspense fallback={<PageLoading />}>
+              <Routes>
+                <Route path="/sign-in" element={<SignInPage />} />
+                <Route path="/studio/:carId" element={<StudioPage />} />
+                <Route element={<RequireMember />}>
+                  <Route element={<AppShell />}>
+                    <Route index element={<HomePage />} />
+                    <Route path="garage" element={<GaragePage />} />
+                    <Route path="cars/:carId" element={<CarPage />} />
+                    <Route path="events" element={<EventsPage />} />
+                    <Route path="members" element={<MembersPage />} />
+                  </Route>
                 </Route>
-              </Route>
-            </Routes>
-          </Suspense>
-        </Router>
+              </Routes>
+            </Suspense>
+          </Router>
+        </RsvpProvider>
       </GarageProvider>
     </AuthProvider>
   )

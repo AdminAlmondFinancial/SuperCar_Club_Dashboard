@@ -40,25 +40,28 @@ export default function CarPage() {
   return (
     <div className="relative min-h-dvh overflow-hidden bg-ink">
       {/* Make name as a watermark behind the stage, as the Mercedes reference does with its star */}
-      <div aria-hidden className="pointer-events-none absolute inset-x-0 top-24 flex justify-center overflow-hidden">
+      <div aria-hidden className="pointer-events-none absolute inset-x-0 top-[34vh] flex justify-center overflow-hidden md:top-[30vh]">
         <span className="type-display text-[clamp(8rem,22vw,22rem)] leading-none whitespace-nowrap text-ivory/[0.03]">{car.make}</span>
       </div>
       <div aria-hidden className="absolute inset-x-0 top-0 h-[80vh] bg-[radial-gradient(70%_60%_at_50%_45%,rgba(58,155,138,0.16),transparent_70%)]" />
 
       <div className="relative mx-auto max-w-[1440px] pb-dock px-4 pt-24 md:px-8 md:pt-28">
-        <Link to="/garage" className="inline-flex items-center gap-2 text-sm text-smoke hover:text-ivory">
-          <ArrowLeft className="size-4" /> Garage
+        <Link to="/garage" className="-ml-2 inline-flex h-10 items-center gap-2 rounded-full px-2 text-label text-smoke transition-colors hover:text-ivory">
+          <ArrowLeft className="size-4" aria-hidden /> Back to garage
         </Link>
 
-        <div className="mt-4 flex flex-wrap items-end justify-between gap-6">
-          <div>
-            <h1 className="type-display text-[clamp(2.75rem,6vw,5.5rem)] text-ivory">{car.make}</h1>
-            <p className="mt-2 text-[17px] text-smoke">
-              {car.model}, {car.year}
+        <div className="mt-3 flex flex-wrap items-end justify-between gap-6">
+          <div className="min-w-0">
+            <p className="eyebrow">{entry ? 'Your collection' : 'Club register'}</p>
+            <h1 className="type-display mt-2 text-[clamp(2.5rem,5.5vw,4.75rem)] leading-[0.95] text-ivory">
+              {car.make} {car.model}
+            </h1>
+            <p className="mt-3 text-lead text-smoke">
+              {car.year}, {car.engine}
             </p>
           </div>
           {entry ? (
-            <span className="inline-flex h-11 items-center gap-2 rounded-full border border-teal/40 bg-teal/10 px-5 text-sm text-teal-bright">
+            <span className="inline-flex h-11 items-center gap-2 rounded-full border border-teal/40 bg-teal/10 px-5 text-label text-teal-bright">
               <Check className="size-4" /> In your garage
             </span>
           ) : (
@@ -87,7 +90,7 @@ export default function CarPage() {
                   aria-pressed={hotspot === h.id}
                   onClick={() => setHotspot(hotspot === h.id ? null : h.id)}
                   className={cn(
-                    'h-9 rounded-full border px-4 text-[13px] transition-colors duration-300',
+                    'h-10 rounded-full border px-4 text-label transition-colors duration-200',
                     hotspot === h.id ? 'border-teal bg-teal text-ink' : 'border-line-strong text-smoke hover:text-ivory',
                   )}
                 >
@@ -95,7 +98,7 @@ export default function CarPage() {
                 </button>
               ))}
             </div>
-            <p className="pointer-events-none mt-3 flex items-center justify-center gap-2 text-center text-[13px] text-smoke">
+            <p className="pointer-events-none mt-3 flex items-center justify-center gap-2 text-center text-caption text-smoke">
               <Hand className="size-3.5" strokeWidth={1.75} aria-hidden />
               Drag to walk around the car. Scroll or pinch to zoom.
             </p>
@@ -103,12 +106,12 @@ export default function CarPage() {
 
           <aside className="flex flex-col gap-4 lg:pt-10">
             <div className="rounded-[24px] bg-ivory p-6 text-ink">
-              <p className="text-[13px] text-ink/60">{active ? 'Up close' : 'Did you know'}</p>
+              <p className="text-caption font-medium text-ink/70">{active ? 'Up close' : 'Did you know'}</p>
               <h2 className="type-display mt-2 text-[26px] leading-tight">{active ? active.label : car.tagline}</h2>
-              <p className="mt-3 text-[14px] leading-relaxed text-ink/75">{active ? active.detail : car.facts[factIndex]}</p>
+              <p className="mt-3 text-label leading-relaxed text-ink/80">{active ? active.detail : car.facts[factIndex]}</p>
               {!active && (
                 <div className="mt-5 flex items-center justify-between">
-                  <span className="type-spec text-caption text-ink/50">
+                  <span className="type-spec text-caption text-ink/65">
                     {factIndex + 1} of {car.facts.length}
                   </span>
                   <div className="flex gap-1.5">
@@ -116,7 +119,7 @@ export default function CarPage() {
                       type="button"
                       aria-label="Previous fact"
                       onClick={() => setFactIndex((i) => (i - 1 + car.facts.length) % car.facts.length)}
-                      className="flex size-8 items-center justify-center rounded-full border border-ink/15 hover:bg-ink/5"
+                      className="flex size-10 items-center justify-center rounded-full border border-ink/15 hover:bg-ink/5"
                     >
                       <ChevronLeft className="size-4" />
                     </button>
@@ -124,7 +127,7 @@ export default function CarPage() {
                       type="button"
                       aria-label="Next fact"
                       onClick={() => setFactIndex((i) => (i + 1) % car.facts.length)}
-                      className="flex size-8 items-center justify-center rounded-full border border-ink/15 hover:bg-ink/5"
+                      className="flex size-10 items-center justify-center rounded-full border border-ink/15 hover:bg-ink/5"
                     >
                       <ChevronRight className="size-4" />
                     </button>
@@ -132,16 +135,16 @@ export default function CarPage() {
                 </div>
               )}
               {active && (
-                <button type="button" onClick={() => setHotspot(null)} className="mt-5 text-[13px] font-medium underline underline-offset-4">
+                <button type="button" onClick={() => setHotspot(null)} className="mt-5 h-10 text-label font-medium underline underline-offset-4">
                   Back to facts
                 </button>
               )}
             </div>
 
             <div className="panel p-5">
-              <p className="text-[13px] text-smoke">Engine</p>
+              <p className="text-caption text-smoke">Engine</p>
               <p className="mt-1 text-ivory">{car.engine}</p>
-              <p className="mt-3 text-[13px] text-smoke">Gearbox and drive</p>
+              <p className="mt-3 text-caption text-smoke">Gearbox and drive</p>
               <p className="mt-1 text-ivory">
                 {car.transmission}, {car.drivetrain}
               </p>
@@ -149,11 +152,11 @@ export default function CarPage() {
           </aside>
         </div>
 
-        {/* Feature highlights, after the Mercedes reference */}
-        <section aria-labelledby="highlights" className="mt-12">
+        {/* Specifications, grouped; the garage's "View details" lands here */}
+        <section id="details" aria-labelledby="highlights" className="mt-12 scroll-mt-28">
           <div className="mb-5 flex flex-wrap items-center justify-between gap-4">
-            <h2 id="highlights" className="type-display text-[32px] text-ivory">
-              Feature highlights
+            <h2 id="highlights" className="type-display text-[clamp(2rem,3.4vw,2.75rem)] text-ivory">
+              Performance
             </h2>
             <div className="flex items-center gap-3" role="radiogroup" aria-label="Paint colour">
               <span className="text-sm text-smoke">{car.colours.find((c) => c.hex === colour)?.name ?? 'Colour'}</span>
@@ -178,10 +181,10 @@ export default function CarPage() {
           <ul className="-mx-4 flex snap-x gap-3 overflow-x-auto px-4 pb-2 [scrollbar-width:none] md:mx-0 md:grid md:grid-cols-3 md:px-0 xl:grid-cols-6 [&::-webkit-scrollbar]:hidden">
             {tiles.map((t) => (
               <li key={t.label} className="tile min-w-[160px] shrink-0 snap-start p-5">
-                <p className="text-[13px] text-smoke">{t.label}</p>
+                <p className="text-caption text-smoke">{t.label}</p>
                 <p className="mt-6 flex items-baseline gap-1.5">
                   <span className="type-spec text-[30px] leading-none text-ivory">{t.value}</span>
-                  {t.unit && <span className="text-[13px] text-smoke">{t.unit}</span>}
+                  {t.unit && <span className="text-caption text-smoke">{t.unit}</span>}
                 </p>
               </li>
             ))}
@@ -191,20 +194,20 @@ export default function CarPage() {
         {/* All ten facts */}
         <section aria-labelledby="facts" className="relative mt-16 grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
           <Piston className="pointer-events-none absolute -bottom-10 -left-10 hidden size-64 text-champagne opacity-[0.1] lg:block" />
-          <h2 id="facts" className="type-display text-[32px] text-ivory">
+          <h2 id="facts" className="type-display text-[clamp(2rem,3.4vw,2.75rem)] text-ivory">
             Ten things to know about the {car.model}
           </h2>
           <ol className="grid gap-x-10 gap-y-6 sm:grid-cols-2">
             {car.facts.map((f, i) => (
               <li key={f} className="flex gap-4 border-t border-line pt-4">
-                <span className="type-spec text-[13px] text-champagne">{String(i + 1).padStart(2, '0')}</span>
-                <p className="text-[15px] leading-relaxed text-ivory/85">{f}</p>
+                <span className="type-spec text-caption text-champagne">{String(i + 1).padStart(2, '0')}</span>
+                <p className="leading-relaxed text-ivory/90">{f}</p>
               </li>
             ))}
           </ol>
         </section>
 
-        <p className="mt-16 text-caption text-smoke">
+        <p className="mt-16 max-w-3xl text-caption text-smoke">
           {car.id === 'ferrari-458-italia'
             ? 'Ferrari 458 model by vicent091036 on Sketchfab, as distributed with the three.js examples.'
             : 'Stylised model built from the car’s published dimensions. Figures are manufacturer claims and may vary by market.'}

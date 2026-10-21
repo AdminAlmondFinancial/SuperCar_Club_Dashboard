@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
-const PIN_VH_MULTIPLE = 3.2;
+const PIN_VH_MULTIPLE = 2.4;
 const IMMERSE_OVERFILL = 1.04;
 const ENTRY_DELAY = 0.2;
 const CARD_START_SCALE_DESKTOP = 0.6;
@@ -20,6 +20,10 @@ export type HeroScrubProps = {
   bgClassName?: string;
   accentHex?: string;
   defaultAspect?: number;
+  /** Small label above the stage, such as "Featured vehicle". */
+  eyebrow?: string;
+  /** The next step, shown under the stage, such as a link into the 3D viewer. */
+  action?: ReactNode;
 };
 
 function usePrefersReducedMotion() {
@@ -42,6 +46,8 @@ export function HeroScrub({
   bgClassName = "bg-black",
   accentHex = "#3a9b8a",
   defaultAspect = 16 / 9,
+  eyebrow,
+  action,
 }: HeroScrubProps) {
   const sectionRef = useRef<HTMLElement>(null);
   const stickyRef = useRef<HTMLDivElement>(null);
@@ -200,13 +206,13 @@ export function HeroScrub({
       master.to(cardRef.current, { scale: 1, ease: "power2.out", duration: 0.15 }, 0);
       master.to(titleTopRef.current, {
         x: () => (window.innerWidth < 768 ? "-70vw" : "-60vw"),
-        letterSpacing: "0.02em",
+        letterSpacing: "0.01em",
         ease: "power2.inOut",
         duration: 0.15,
       }, 0);
       master.to(titleBottomRef.current, {
         x: () => (window.innerWidth < 768 ? "70vw" : "60vw"),
-        letterSpacing: "0.02em",
+        letterSpacing: "0.01em",
         ease: "power2.inOut",
         duration: 0.15,
       }, 0);
@@ -217,10 +223,10 @@ export function HeroScrub({
 
       master.to(cardRef.current, { scale: startScale(), ease: "power3.inOut", duration: 0.22 }, 0.78);
       master.to(titleTopRef.current, {
-        x: 0, opacity: 1, letterSpacing: "-0.04em", ease: "power2.inOut", duration: 0.22,
+        x: 0, opacity: 1, letterSpacing: "-0.015em", ease: "power2.inOut", duration: 0.22,
       }, 0.78);
       master.to(titleBottomRef.current, {
-        x: 0, opacity: 1, letterSpacing: "-0.04em", ease: "power2.inOut", duration: 0.22,
+        x: 0, opacity: 1, letterSpacing: "-0.015em", ease: "power2.inOut", duration: 0.22,
       }, 0.78);
 
       ScrollTrigger.refresh();
@@ -228,6 +234,24 @@ export function HeroScrub({
 
     return () => ctx.revert();
   }, [ready, framesOk, reduced, aspect, frameCount]);
+
+  const titleStyle = { fontSize: "clamp(3rem, 9vw, 8rem)", lineHeight: 0.9, letterSpacing: "-0.015em" };
+
+  // With reduced motion there is no scrubbing: one still frame, the titles and the action.
+  if (reduced) {
+    return (
+      <section className={`relative w-full overflow-hidden py-20 text-white ${bgClassName}`} aria-label={`${titleTop} ${titleBottom}`}>
+        <div aria-hidden className="absolute inset-0" style={{ backgroundColor: accentHex }} />
+        <div aria-hidden className="absolute inset-0 bg-black/40" />
+        <div className="relative flex flex-col items-center gap-4 px-4 text-center">
+          {eyebrow && <p className="eyebrow">{eyebrow}</p>}
+          <h2 className="type-display" style={titleStyle}>{titleTop} {titleBottom}</h2>
+          <img src={frameUrl(0)} alt="" className="w-[min(92vw,900px)] rounded-[16px] ring-1 ring-white/10" />
+          {action}
+        </div>
+      </section>
+    );
+  }
 
   // Tall section + inner sticky div = same visual as ScrollTrigger pin, without needing pin
   const tallHeight = `${(PIN_VH_MULTIPLE + 1) * 100}vh`;
@@ -237,7 +261,7 @@ export function HeroScrub({
       ref={sectionRef}
       className={`relative w-full overflow-clip text-white ${bgClassName}`}
       style={{ height: tallHeight }}
-      aria-label="Cinematic scroll-scrubbed hero"
+      aria-label={`${titleTop} ${titleBottom}`}
     >
       <div
         ref={stickyRef}
@@ -253,9 +277,8 @@ export function HeroScrub({
         }} />
 
         <div className="relative z-10 flex h-full w-full flex-col items-center justify-center gap-3 md:gap-4">
-          <h2 ref={titleTopRef} aria-hidden className="type-marque" style={{
-            fontSize: "clamp(3.75rem, 12vw, 11rem)", lineHeight: 0.85, letterSpacing: "-0.04em",
-          }}>{titleTop}</h2>
+          {eyebrow && <p className="eyebrow absolute top-24 md:top-28">{eyebrow}</p>}
+          <h2 ref={titleTopRef} aria-hidden className="type-display" style={titleStyle}>{titleTop}</h2>
 
           <div ref={cardRef} className="relative overflow-hidden rounded-[12px] shadow-[0_20px_80px_rgba(0,0,0,0.55)] ring-1 ring-white/10 will-change-transform md:rounded-[16px]" style={{
             width: `min(96vw, calc(72svh * ${aspect}))`,
@@ -268,9 +291,8 @@ export function HeroScrub({
             )}
           </div>
 
-          <h2 ref={titleBottomRef} aria-hidden className="type-marque" style={{
-            fontSize: "clamp(3.75rem, 12vw, 11rem)", lineHeight: 0.85, letterSpacing: "-0.04em",
-          }}>{titleBottom}</h2>
+          <h2 ref={titleBottomRef} aria-hidden className="type-display" style={titleStyle}>{titleBottom}</h2>
+          {action && <div className="absolute bottom-[calc(6rem+env(safe-area-inset-bottom))] md:bottom-10">{action}</div>}
         </div>
       </div>
     </section>
