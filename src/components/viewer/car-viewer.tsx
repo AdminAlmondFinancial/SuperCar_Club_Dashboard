@@ -1,6 +1,6 @@
 import { CameraControls, ContactShadows, Environment, Html, Lightformer, useGLTF } from '@react-three/drei'
 import { Canvas, useThree } from '@react-three/fiber'
-import { Suspense, useEffect, useMemo, useRef } from 'react'
+import { Suspense, use, useEffect, useMemo, useRef } from 'react'
 import * as THREE from 'three'
 
 import type { Car, Hotspot } from '@/data/cars'
@@ -9,9 +9,10 @@ import { cn } from '@/lib/utils'
 
 import { buildCar, layoutFor, type CarLayout } from './procedural/car-geometry'
 
-/** Cars with a detailed, openly licensed scan instead of the stylised body. */
+/** The 458 is an openly licensed scan; the rest were generated from studio images in Higgsfield (Tripo H3.1). */
 type ScanModel = {
-  url: string
+  /** File name in public/models, without the extension. */
+  file: string
   /** Body painted in the reference cobalt (#1f4fd1) and recoloured by keying that hue, instead of a named paint material. */
   keyed?: boolean
   /** Turn the scan half a revolution so its nose points along +x. */
@@ -19,8 +20,39 @@ type ScanModel = {
 }
 
 const MODELS: Record<string, ScanModel> = {
-  'ferrari-458-italia': { url: asset('models/ferrari-458.glb') },
-  'lamborghini-revuelto': { url: asset('models/lamborghini-revuelto.glb'), keyed: true },
+  'ferrari-458-italia': { file: 'ferrari-458' },
+  'ferrari-amalfi': { file: 'ferrari-amalfi', keyed: true, flip: true },
+  'porsche-911-gt3-rs': { file: 'porsche-911-gt3-rs', keyed: true },
+  'lamborghini-revuelto': { file: 'lamborghini-revuelto', keyed: true },
+  'mclaren-750s': { file: 'mclaren-750s', keyed: true },
+  'aston-martin-vanquish': { file: 'aston-martin-vanquish', keyed: true },
+  'mercedes-amg-g63': { file: 'mercedes-amg-g63', keyed: true },
+  'rolls-royce-spectre': { file: 'rolls-royce-spectre', keyed: true },
+  'bentley-continental-gt-speed': { file: 'bentley-continental-gt-speed', keyed: true },
+  'bugatti-chiron-super-sport': { file: 'bugatti-chiron-super-sport', keyed: true },
+}
+
+type GlbWindow = Window & { __GLB?: Record<string, string> }
+const modelUrls = new Map<string, Promise<string>>()
+
+/**
+ * Hosts that cannot serve .glb files (a VITE_EMBED_MODELS build) get each model as models/<file>.js,
+ * a script that stores the model as a blob URL in window.__GLB.
+ */
+function modelUrl(file: string) {
+  if (!import.meta.env.VITE_EMBED_MODELS) return Promise.resolve(asset(`models/${file}.glb`))
+  let p = modelUrls.get(file)
+  if (!p) {
+    p = new Promise<string>((resolve, reject) => {
+      const s = document.createElement('script')
+      s.src = asset(`models/${file}.js`)
+      s.onload = () => resolve((window as GlbWindow).__GLB![file])
+      s.onerror = reject
+      document.head.append(s)
+    })
+    modelUrls.set(file, p)
+  }
+  return p
 }
 
 /**
@@ -30,7 +62,8 @@ const MODELS: Record<string, ScanModel> = {
 function keyedPaint(src: THREE.MeshStandardMaterial, colour: string) {
   const mat = new THREE.MeshPhysicalMaterial({
     map: src.map,
-    normalMap: src.normalMap,
+    // The generated normal map adds ripples to the panels; the mesh normals read cleaner.
+    normalMap: null,
     roughnessMap: src.roughnessMap,
     metalnessMap: src.metalnessMap,
     roughness: 1,
@@ -51,12 +84,13 @@ function keyedPaint(src: THREE.MeshStandardMaterial, colour: string) {
           float hi = max(t.r, t.g);
           // Strongly blue texels are body paint; the ratio test leaves grey glass and black trim alone.
           paintKey = smoothstep(0.04, 0.12, t.b - hi) * smoothstep(0.45, 0.7, (t.b - hi) / max(t.b, 1e-3));
-          vec3 painted = uPaint * clamp(t.b / 0.637, 0.15, 1.4);
+          // Keep only part of the baked shading, which otherwise shows the scan's ripples.
+          vec3 painted = uPaint * mix(1.0, clamp(t.b / 0.637, 0.15, 1.4), 0.45);
           diffuseColor.rgb = mix(diffuseColor.rgb, painted, paintKey);
         }`,
       )
       .replace('#include <roughnessmap_fragment>', '#include <roughnessmap_fragment>\nroughnessFactor = mix(roughnessFactor, 0.32, paintKey);')
-      .replace('#include <metalnessmap_fragment>', '#include <metalnessmap_fragment>\nmetalnessFactor = mix(metalnessFactor, 0.55, paintKey);')
+      .replace('#include <metalnessmap_fragment>', '#include <metalnessmap_fragment>\nmetalnessFactor = mix(metalnessFactor, 0.3, paintKey);')
       .replace('#include <clearcoat_fragment_maps>', '#include <clearcoat_fragment_maps>\nmaterial.clearcoat *= paintKey;')
   }
   return { mat, paint: paint.value }
@@ -73,7 +107,7 @@ function ProceduralCar({ car, colour }: { car: Car; colour: string }) {
 }
 
 function ScannedCar({ model, colour, lay }: { model: ScanModel; colour: string; lay: CarLayout }) {
-  const gltf = useGLTF(model.url, asset('draco/'))
+  const gltf = useGLTF(use(modelUrl(model.file)), asset('draco/'))
   const { scene, paint } = useMemo(() => {
     const scene = gltf.scene.clone(true)
     let paint: THREE.Color | null = null
