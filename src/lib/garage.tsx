@@ -12,6 +12,8 @@ export type GarageEntry = {
   acquired: string // ISO date
   lastService: string // ISO date
   mileageKm: number
+  /** Shown to other members in the Club Collection. Off unless the owner turns it on. */
+  shared?: boolean
 }
 
 type GarageState = {
@@ -29,7 +31,7 @@ const GarageContext = createContext<GarageState | null>(null)
 
 // The preview starts with one car so the dashboard has something to show.
 const PREVIEW_ENTRIES: GarageEntry[] = [
-  { carId: 'ferrari-amalfi', colour: '#B3131B', acquired: '2025-09-14', lastService: '2025-11-20', mileageKm: 4820 },
+  { carId: 'ferrari-458-italia', colour: '#F2C500', acquired: '2024-05-18', lastService: '2026-03-02', mileageKm: 21480, shared: true },
 ]
 
 const storageKey = (memberId: string) => `scc.garage.${memberId}`

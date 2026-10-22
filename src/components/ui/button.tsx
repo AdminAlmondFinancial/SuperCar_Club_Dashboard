@@ -4,25 +4,25 @@ import { cva, type VariantProps } from 'class-variance-authority'
 
 import { cn } from '@/lib/utils'
 
+/** Square-cornered, letterspaced buttons, as on an auction catalogue rather than an app. */
 const buttonVariants = cva(
-  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full text-sm font-medium transition-[background-color,color,border-color,transform] duration-300 ease-(--ease-luxe) disabled:pointer-events-none disabled:opacity-50 active:scale-[0.98] [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0',
+  'inline-flex items-center justify-center gap-3 whitespace-nowrap text-[11px] font-semibold uppercase tracking-[0.16em] transition-[background-color,color,border-color] duration-300 disabled:pointer-events-none disabled:opacity-40 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0',
   {
     variants: {
       variant: {
-        default: 'bg-ivory text-ink hover:bg-white',
-        accent: 'bg-teal text-ink hover:bg-teal-bright',
-        outline: 'border border-line-strong bg-transparent text-ivory hover:border-ivory/40 hover:bg-ivory/5',
-        ghost: 'text-ivory hover:bg-ivory/8',
-        link: 'text-teal-bright underline-offset-4 hover:underline',
+        solid: 'bg-ink text-paper hover:bg-obsidian-3',
+        outline: 'border border-ink/80 text-ink hover:bg-ink hover:text-paper',
+        'outline-light': 'border border-white/70 text-white hover:bg-white hover:text-ink',
+        light: 'bg-white text-ink hover:bg-paper',
+        ghost: 'text-ink hover:bg-ink/5',
       },
       size: {
-        default: 'h-11 px-5',
-        sm: 'h-9 px-4 text-[13px]',
-        lg: 'h-13 px-7 text-[15px]',
-        icon: 'size-10',
+        default: 'h-12 px-6',
+        sm: 'h-10 px-4',
+        icon: 'size-10 tracking-normal',
       },
     },
-    defaultVariants: { variant: 'default', size: 'default' },
+    defaultVariants: { variant: 'solid', size: 'default' },
   },
 )
 

@@ -1,6 +1,6 @@
 # SuperCar Club dashboard
 
-The members' dashboard for the SuperCar Club: a home page with the season's drives and meets, service reminders and the cars in other members' garages; a garage where each member keeps up to two cars; and an interactive 3D view of the outside of ten real cars, with labelled features, paint colours and facts.
+The members' dashboard for the SuperCar Club: a home page with the season's drives and meets, service reminders and the cars in other members' garages; a member dashboard; a garage where each member keeps up to two cars and can share them with the Club Collection; and a dark showroom for each of ten cars with a hosted Sketchfab 3D viewer.
 
 It is a React app (Vite, TypeScript, Tailwind CSS and shadcn-style components) served by a Cloudflare Worker, which also handles sign-in with Google and Microsoft and protects the admin page with Cloudflare Access.
 
@@ -23,27 +23,30 @@ See [DEPLOY.md](DEPLOY.md) for the full step-by-step guide. In short: `npx wrang
 
 | Path | What it is |
 | --- | --- |
-| `src/pages/` | One file per page: sign-in, home, garage, car, events, members |
-| `src/components/ui/` | Base components (button, card, input, badge) and the `hero-scrub` scroll animation |
-| `src/components/viewer/` | The 3D viewer and the generator for the stylised car models |
-| `src/components/memorabilia/` | Line-art decorations (rev counter, chequered flag, steering wheel and more) |
-| `src/data/` | The ten cars with specs and facts, plus sample events and members |
-| `src/lib/` | Sign-in state and the member's garage |
-| `src/index.css` | Colours, type and shared surfaces |
+| `src/pages/` | One file per page: sign-in, home, dashboard, garage (My Garage and Club Collection), car showroom, events, members, account |
+| `src/components/layout/` | The sticky header, mobile bottom navigation and menu |
+| `src/components/site/` | Shared pieces: type and photo primitives, the Sketchfab viewer, RSVP button, footer |
+| `src/data/` | The ten cars, their Sketchfab models, sample events, members and editorial stories |
+| `src/lib/` | Sign-in state, the member's garage and event replies |
+| `src/index.css` | Colours (Gallery White, Obsidian and greys), Newsreader and Geist type, motion |
 | `worker/` | The Cloudflare Worker: OAuth, sessions, garage API, Access-protected admin page |
-| `public/renders/` | Still images of each car, rendered from its 3D model |
-| `public/models/` | The Ferrari 458 model and its Draco decoder in `public/draco/` |
+| `public/images/cars/` | A studio still of each car, light (catalogue) and dark (showroom), 800 and 1600 px wide |
+| `public/images/editorial/` | The cover photograph and the mountain-drive photograph |
 
-`/studio/<car-id>?still` shows a car on a transparent stage; it is used to render the stills in `public/renders`.
+## The 3D showroom
 
-## About the 3D cars
+Each car opens in a hosted Sketchfab viewer, which loads only when the member presses **Explore in 3D**. The models, creators and licences are listed in `src/data/showroom.ts` and credited under every viewer. All ten were opened in a browser and reached Sketchfab's "viewer ready" state in October 2026. The studio stills are cut from each model's own Sketchfab preview, so they carry the same credit. Several models are Sketchfab Store or non-commercial (CC BY-NC-SA) models: check each licence before the site is used commercially.
 
-The Ferrari 458 Spider uses a detailed model by vicent091036 on Sketchfab, as distributed with the three.js examples; check its licence before commercial use. The other nine cars are stylised models generated in code from each car's published length, width, height and wheelbase, with touches specific to each car (wings, grilles, intakes, wheel designs and caliper colours).
+Some hosts cannot show another site in a frame. Build with `VITE_SKETCHFAB_MODE=link` and **Explore in 3D** opens the model on Sketchfab in a new tab instead.
+
+## Sample content
+
+Events, the member directory, club updates and the home page stories are sample content and are labelled as such on the pages. Replies to events are saved in the browser until there is an events service. The garage is real: it is saved to Cloudflare KV for signed-in members, and in the browser in preview. Members can choose to share each car with the Club Collection.
 
 ## About the car data
 
 Specs, prices and service intervals are approximate and should be checked against the manufacturer before they are relied on. Service intervals in particular vary by market.
 
-## The home page hero
+## Static builds
 
-The scroll animation uses the image frames from the `hero-scrub` component's demo, loaded from `raw.githubusercontent.com/duthiljean/ferrari-hero-demo`. They belong to that repository and are not included here. `public/hero/` holds our own 120-frame turntable of the Ferrari 458 Spider, rendered from the 3D viewer; build with `VITE_HERO_LOCAL=1` to use it instead. `VITE_HASH_ROUTER=1` switches to hash routes for static hosting without the Worker. For a host that cannot serve `.glb` files, build with `VITE_EMBED_MODELS=1` and then run `node scripts/embed-models.mjs`, which writes each model as a script in `dist/models/`.
+`VITE_HASH_ROUTER=1` switches to hash routes for static hosting without the Worker, and `--base ./` lets the build run from a sub-folder.

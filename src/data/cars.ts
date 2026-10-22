@@ -127,7 +127,7 @@ export const cars: Car[] = [
   {
     id: "porsche-911-gt3-rs",
     make: "Porsche",
-    model: "911 GT3 RS (992)",
+    model: "911 GT3 RS",
     year: 2023,
     tagline: "Track weapon wearing number plates",
     body: "coupe",

@@ -45,4 +45,5 @@ export type GarageEntry = {
   acquired: string
   lastService: string
   mileageKm: number
+  shared?: boolean
 }

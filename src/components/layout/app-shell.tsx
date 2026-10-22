@@ -1,33 +1,139 @@
-import { Bell, CalendarDays, CarFront, House, LogOut, Search, Users } from 'lucide-react'
-import { useEffect, useState } from 'react'
-import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
+import { CalendarDays, CarFront, ChevronDown, House, LayoutGrid, LogOut, Menu, Search, UserRound, Users, X } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 
-import { Wordmark } from '@/components/layout/crest'
+import { Avatar, Wordmark } from '@/components/site/primitives'
+import { SiteFooter } from '@/components/site/site-footer'
 import { useAuth } from '@/lib/auth'
 import { cn } from '@/lib/utils'
 
 export const NAV = [
-  { to: '/', label: 'Overview', icon: House, end: true },
+  { to: '/', label: 'Home', icon: House, end: true },
+  { to: '/dashboard', label: 'Dashboard', icon: LayoutGrid },
   { to: '/garage', label: 'Garage', icon: CarFront },
   { to: '/events', label: 'Events', icon: CalendarDays },
   { to: '/members', label: 'Members', icon: Users },
 ] as const
 
-function initials(name: string) {
-  return name
-    .split(' ')
-    .map((p) => p[0])
-    .slice(0, 2)
-    .join('')
+type Tone = 'overlay' | 'paper' | 'dark'
+
+function firstName(name: string) {
+  return name.split(/\s+/)[0] ?? name
+}
+
+function AccountMenu({ tone }: { tone: Tone }) {
+  const { member, signOut, previewMode } = useAuth()
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+  const { pathname } = useLocation()
+
+  useEffect(() => setOpen(false), [pathname])
+  useEffect(() => {
+    if (!open) return
+    const onDown = (e: PointerEvent) => !ref.current?.contains(e.target as Node) && setOpen(false)
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setOpen(false)
+    document.addEventListener('pointerdown', onDown)
+    document.addEventListener('keydown', onKey)
+    return () => {
+      document.removeEventListener('pointerdown', onDown)
+      document.removeEventListener('keydown', onKey)
+    }
+  }, [open])
+
+  if (!member) return null
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        aria-expanded={open}
+        aria-haspopup="menu"
+        onClick={() => setOpen((v) => !v)}
+        className="flex items-center gap-2.5 py-1"
+      >
+        <Avatar name={member.name} url={member.avatarUrl} className={cn('size-8', tone === 'paper' ? '' : 'bg-white/15')} />
+        <span className="eyebrow hidden text-[11px] xl:inline">{firstName(member.name)}</span>
+        <ChevronDown className={cn('size-3.5 transition-transform', open && 'rotate-180')} strokeWidth={1.75} />
+      </button>
+      {open && (
+        <div role="menu" className="absolute top-12 right-0 w-64 border border-line bg-white p-2 text-ink shadow-[0_24px_60px_-20px_rgb(0_0_0/0.35)]">
+          <div className="border-b border-line px-3 pt-2 pb-3">
+            <p className="text-[14px] font-medium">{member.name}</p>
+            <p className="truncate text-[12px] text-stone">{member.email}</p>
+            {previewMode && <p className="mt-1 text-[11px] text-stone">Preview session in this browser</p>}
+          </div>
+          <Link role="menuitem" to="/account" className="mt-1 flex items-center gap-3 px-3 py-2.5 text-[13px] hover:bg-mist">
+            <UserRound className="size-4" strokeWidth={1.5} /> Your account
+          </Link>
+          <button
+            role="menuitem"
+            type="button"
+            onClick={() => void signOut()}
+            className="flex w-full items-center gap-3 px-3 py-2.5 text-[13px] hover:bg-mist"
+          >
+            <LogOut className="size-4" strokeWidth={1.5} /> Sign out
+          </button>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function MobileMenu({ onClose }: { onClose: () => void }) {
+  const { member, signOut } = useAuth()
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose()
+    document.addEventListener('keydown', onKey)
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.removeEventListener('keydown', onKey)
+      document.body.style.overflow = ''
+    }
+  }, [onClose])
+  return (
+    <div role="dialog" aria-modal="true" aria-label="Menu" className="fixed inset-0 z-[70] flex flex-col bg-paper text-ink lg:hidden">
+      <div className="page-gutter flex h-16 items-center justify-between border-b border-line" style={{ marginTop: 'env(safe-area-inset-top, 0px)' }}>
+        <Wordmark className="text-[16px]" />
+        <button type="button" onClick={onClose} aria-label="Close menu" className="-mr-2 flex size-10 items-center justify-center">
+          <X className="size-5" strokeWidth={1.5} />
+        </button>
+      </div>
+      <nav aria-label="Menu" className="page-gutter flex flex-1 flex-col overflow-y-auto py-6">
+        {[...NAV, { to: '/garage/collection', label: 'Club Collection' }, { to: '/account', label: 'Your account' }].map((item) => (
+          <NavLink
+            key={item.to}
+            to={item.to}
+            end={'end' in item}
+            onClick={onClose}
+            className={({ isActive }) => cn('display border-b border-line py-4 text-[28px]', isActive ? 'text-ink' : 'text-ink/60')}
+          >
+            {item.label}
+          </NavLink>
+        ))}
+        {member && (
+          <div className="mt-auto flex items-center justify-between gap-4 pt-10">
+            <div className="flex min-w-0 items-center gap-3">
+              <Avatar name={member.name} url={member.avatarUrl} />
+              <div className="min-w-0">
+                <p className="truncate text-[14px] font-medium">{member.name}</p>
+                <p className="truncate text-[12px] text-stone">{member.email}</p>
+              </div>
+            </div>
+            <button type="button" onClick={() => void signOut()} className="eyebrow shrink-0 underline underline-offset-4">
+              Sign out
+            </button>
+          </div>
+        )}
+      </nav>
+    </div>
+  )
 }
 
 export function AppShell() {
-  const { member, signOut } = useAuth()
-  const navigate = useNavigate()
-  const [scrolled, setScrolled] = useState(false)
   const { pathname, hash } = useLocation()
+  const [scrolled, setScrolled] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
 
-  // React Router does not scroll to #anchors, so do it here (the bell links to #service).
+  // React Router does not scroll on navigation or to #anchors, so do both here.
   useEffect(() => {
     if (!hash) {
       window.scrollTo(0, 0)
@@ -38,117 +144,105 @@ export function AppShell() {
   }, [pathname, hash])
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24)
+    const onScroll = () => setScrolled(window.scrollY > 80)
     onScroll()
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
+  useEffect(() => setMenuOpen(false), [pathname])
+
+  const showroom = pathname.startsWith('/cars/')
+  const home = pathname === '/'
+  const tone: Tone = showroom ? 'dark' : home && !scrolled ? 'overlay' : 'paper'
+
   return (
-    <div className="min-h-dvh bg-ink">
+    <div className="min-h-dvh">
+      <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[80] focus:bg-white focus:px-4 focus:py-2 focus:text-ink">
+        Skip to content
+      </a>
       <header
         className={cn(
-          'fixed inset-x-0 top-0 z-50 border-b transition-[background-color,border-color] duration-500',
-          scrolled ? 'border-line bg-black/75 backdrop-blur-xl' : 'border-transparent',
+          'fixed inset-x-0 top-0 z-50 border-b transition-[background-color,border-color,color] duration-500',
+          tone === 'overlay' && 'border-transparent bg-gradient-to-b from-black/55 to-transparent text-white',
+          tone === 'paper' && 'border-line bg-paper/92 text-ink backdrop-blur-md',
+          tone === 'dark' && 'border-obsidian-line bg-obsidian/92 text-white backdrop-blur-md',
         )}
+        style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}
       >
-        <div className="mx-auto flex h-20 max-w-[1440px] items-center justify-between gap-4 px-4 md:px-8">
-          <NavLink to="/" aria-label="SuperCar Club overview">
-            <Wordmark />
-          </NavLink>
+        <div className="page-gutter mx-auto flex h-16 max-w-[1520px] items-center justify-between gap-6 lg:h-[72px]">
+          <Link to="/" aria-label="SuperCar Club home">
+            <Wordmark className="text-[16px] lg:text-[19px]" />
+          </Link>
 
-          {/* Pill navigation, after the Carvia reference */}
-          <nav
-            aria-label="Main"
-            className="hidden items-center gap-1 rounded-full border border-line bg-black/55 p-1.5 backdrop-blur-xl md:flex"
-          >
-            {NAV.map(({ to, label, icon: Icon, ...rest }) => (
+          <nav aria-label="Main" className="hidden items-center gap-9 lg:flex">
+            {NAV.map(({ to, label, ...rest }) => (
               <NavLink
                 key={to}
                 to={to}
                 end={'end' in rest}
                 className={({ isActive }) =>
                   cn(
-                    'flex h-10 items-center gap-2 rounded-full px-4 text-[13px] font-medium transition-colors duration-300',
-                    isActive ? 'bg-ivory text-ink' : 'text-smoke hover:text-ivory',
+                    'eyebrow relative py-2 text-[11px] transition-opacity duration-300 after:absolute after:inset-x-0 after:-bottom-0.5 after:h-px after:origin-left after:bg-current after:transition-transform after:duration-500',
+                    isActive ? 'after:scale-x-100' : 'opacity-75 after:scale-x-0 hover:opacity-100 hover:after:scale-x-100',
                   )
                 }
               >
-                <Icon className="size-4" strokeWidth={1.75} />
                 {label}
               </NavLink>
             ))}
           </nav>
 
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => navigate('/garage?search=1')}
-              className="hidden size-10 items-center justify-center rounded-full border border-line bg-black/55 text-smoke backdrop-blur-xl transition-colors hover:text-ivory sm:flex"
-              aria-label="Search cars"
-            >
-              <Search className="size-4" strokeWidth={1.75} />
+          <div className="flex items-center gap-1 lg:gap-5">
+            <Link to="/garage/collection?search=1" aria-label="Search the Club Collection" className="hidden size-10 items-center justify-center lg:flex">
+              <Search className="size-[18px]" strokeWidth={1.5} />
+            </Link>
+            <span className="hidden h-5 w-px bg-current opacity-25 lg:block" aria-hidden />
+            <div className="hidden lg:block">
+              <AccountMenu tone={tone} />
+            </div>
+            <button type="button" onClick={() => setMenuOpen(true)} aria-label="Open menu" className="-mr-2 flex size-10 items-center justify-center lg:hidden">
+              <Menu className="size-5" strokeWidth={1.5} />
             </button>
-            <button
-              type="button"
-              onClick={() => navigate('/#service')}
-              className="relative flex size-10 items-center justify-center rounded-full border border-line bg-black/55 text-smoke backdrop-blur-xl transition-colors hover:text-ivory"
-              aria-label="Notifications"
-            >
-              <Bell className="size-4" strokeWidth={1.75} />
-              <span className="absolute top-2.5 right-2.5 size-1.5 rounded-full bg-teal-bright" />
-            </button>
-            {member && (
-              <div className="group relative">
-                <button
-                  type="button"
-                  className="flex size-10 items-center justify-center overflow-hidden rounded-full border border-champagne/50 bg-verde text-[13px] font-semibold text-champagne"
-                  aria-label={`Signed in as ${member.name}`}
-                >
-                  {member.avatarUrl ? <img src={member.avatarUrl} alt="" className="size-full object-cover" /> : initials(member.name)}
-                </button>
-                <div className="invisible absolute top-12 right-0 w-56 rounded-[18px] border border-line bg-graphite p-2 opacity-0 shadow-2xl transition-all duration-200 group-focus-within:visible group-focus-within:opacity-100 group-hover:visible group-hover:opacity-100">
-                  <p className="px-3 pt-2 text-sm text-ivory">{member.name}</p>
-                  <p className="truncate px-3 pb-2 text-xs text-smoke">{member.email}</p>
-                  <button
-                    type="button"
-                    onClick={() => void signOut()}
-                    className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm text-smoke hover:bg-ivory/5 hover:text-ivory"
-                  >
-                    <LogOut className="size-4" /> Sign out
-                  </button>
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </header>
 
-      <main>
+      {menuOpen && <MobileMenu onClose={() => setMenuOpen(false)} />}
+
+      <main id="main" className={cn('pb-nav', showroom ? 'bg-obsidian' : 'bg-paper')}>
         <Outlet />
+        <SiteFooter />
       </main>
 
-      {/* Floating pill dock on small screens, after the nav-bar reference */}
+      {/* Bottom navigation on phones and small tablets */}
       <nav
         aria-label="Main"
-        className="fixed inset-x-0 bottom-4 z-50 mx-auto flex w-fit items-center gap-1 rounded-full border border-line bg-black/70 p-1.5 shadow-[0_12px_40px_rgba(0,0,0,0.6)] backdrop-blur-xl md:hidden"
+        className={cn(
+          'fixed inset-x-0 bottom-0 z-50 border-t lg:hidden',
+          showroom ? 'border-obsidian-line bg-obsidian/95 text-white' : 'border-line bg-paper/95 text-ink',
+          'backdrop-blur-md',
+        )}
+        style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
       >
-        {NAV.map(({ to, label, icon: Icon, ...rest }) => (
-          <NavLink
-            key={to}
-            to={to}
-            end={'end' in rest}
-            aria-label={label}
-            className={({ isActive }) =>
-              cn(
-                'flex size-12 items-center justify-center rounded-full transition-colors',
-                isActive ? 'bg-ivory text-ink' : 'text-smoke',
-              )
-            }
-          >
-            <Icon className="size-5" strokeWidth={1.75} />
-          </NavLink>
-        ))}
+        <div className="page-gutter mx-auto grid h-16 max-w-xl grid-cols-5">
+          {NAV.map(({ to, label, icon: Icon, ...rest }) => (
+            <NavLink
+              key={to}
+              to={to}
+              end={'end' in rest}
+              className={({ isActive }) =>
+                cn(
+                  'relative flex flex-col items-center justify-center gap-1 text-[10px] font-medium tracking-[0.04em] transition-opacity',
+                  isActive ? 'opacity-100 before:absolute before:top-0 before:h-0.5 before:w-6 before:bg-current' : 'opacity-55',
+                )
+              }
+            >
+              <Icon className="size-5" strokeWidth={1.5} />
+              {label}
+            </NavLink>
+          ))}
+        </div>
       </nav>
     </div>
   )
