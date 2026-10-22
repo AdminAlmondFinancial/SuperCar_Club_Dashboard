@@ -18,9 +18,19 @@
       "id": "a93c05ac9a64490689d325a433aad96f"
     }
   ],
+
+  "previews": {
+    "kv_namespaces": [
+      {
+        "binding": "CLUB_KV",
+        "id": "0814128db9c845238115ef5e3c3117a5"
+      }
+    ]
+  },
+  
   "vars": {
     // The public address of the site, with no trailing slash. Used to build OAuth redirect URIs.
-    "APP_URL": "https://the-super-car-club.YOUR-SUBDOMAIN.workers.dev",
+    "APP_URL": "https://the-super-car-club.mannie-warriner.workers.dev",
     // Directory (tenant) used for Microsoft sign-in. "common" allows any Microsoft account.
     "MICROSOFT_TENANT": "common"
   }
