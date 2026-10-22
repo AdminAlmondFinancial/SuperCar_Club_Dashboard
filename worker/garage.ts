@@ -29,12 +29,14 @@ export function validateGarage(input: unknown): GarageEntry[] | null {
     if (typeof e.mileageKm !== 'number' || !Number.isFinite(e.mileageKm) || e.mileageKm < 0 || e.mileageKm > 2_000_000) {
       return null
     }
+    if (e.shared !== undefined && typeof e.shared !== 'boolean') return null
     out.push({
       carId: e.carId,
       colour: e.colour,
       acquired: e.acquired,
       lastService: e.lastService,
       mileageKm: Math.round(e.mileageKm),
+      ...(e.shared ? { shared: true } : {}),
     })
   }
   return out

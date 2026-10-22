@@ -1,218 +1,235 @@
-import { ArrowLeft, Check, ChevronLeft, ChevronRight, Hand, Plus } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { ArrowLeft, Check, Pencil, Plus } from 'lucide-react'
+import { useState } from 'react'
 import { Link, Navigate, useParams } from 'react-router-dom'
 
-import { Piston } from '@/components/memorabilia'
-import { Button } from '@/components/ui/button'
-import { CarViewer } from '@/components/viewer/car-viewer'
+import { SketchfabCredit, SketchfabStage } from '@/components/site/sketchfab-viewer'
 import { cars } from '@/data/cars'
-import { GARAGE_LIMIT, useGarage } from '@/lib/garage'
+import { carImage, modelPageUrl, sketchfab } from '@/data/showroom'
+import { GARAGE_LIMIT, nextServiceDate, useGarage } from '@/lib/garage'
 import { cn } from '@/lib/utils'
 
 const gbp = new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP', maximumFractionDigits: 0 })
+const fmtDate = (d: Date) => d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' })
+const mph = (kmh: number) => Math.round(kmh / 1.609344)
+
+const TABS = ['Specifications', 'Overview', 'Service', 'Media'] as const
+type Tab = (typeof TABS)[number]
+
+function Rows({ rows }: { rows: [string, string][] }) {
+  return (
+    <dl className="divide-y divide-obsidian-line border-y border-obsidian-line">
+      {rows.map(([k, v]) => (
+        <div key={k} className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] gap-4 py-3.5 text-[14px]">
+          <dt className="text-fog">{k}</dt>
+          <dd className="tabular">{v}</dd>
+        </div>
+      ))}
+    </dl>
+  )
+}
 
 export default function CarPage() {
   const { carId } = useParams()
   const car = cars.find((c) => c.id === carId)
-  const { entries, add, update, isFull } = useGarage()
+  const { entries, add, isFull, ready } = useGarage()
   const entry = entries.find((e) => e.carId === carId)
-
-  const [hotspot, setHotspot] = useState<string | null>(null)
-  const [localColour, setLocalColour] = useState<string | null>(null)
-  const [factIndex, setFactIndex] = useState(0)
-
-  const colour = entry?.colour ?? localColour ?? car?.colours[0].hex ?? '#888'
-  const active = useMemo(() => car?.hotspots.find((h) => h.id === hotspot) ?? null, [car, hotspot])
+  const [tab, setTab] = useState<Tab>('Specifications')
 
   if (!car) return <Navigate to="/garage" replace />
+  const model = sketchfab[car.id]
+  const colour = entry ? (car.colours.find((c) => c.hex.toLowerCase() === entry.colour.toLowerCase())?.name ?? 'Custom colour') : null
+  const back = entry ? { to: '/garage', label: 'My Garage' } : { to: '/garage/collection', label: 'Club Collection' }
+  const others = cars.filter((c) => c.id !== car.id)
 
-  const pickColour = (hex: string) => (entry ? update(car.id, { colour: hex }) : setLocalColour(hex))
-
-  const tiles = [
-    { label: 'Power', value: `${car.powerHp}`, unit: 'hp' },
-    { label: 'Torque', value: `${car.torqueNm}`, unit: 'Nm' },
-    { label: '0 to 100 km/h', value: `${car.zeroTo100s}`, unit: 'sec' },
-    { label: 'Top speed', value: `${car.topSpeedKmh}`, unit: 'km/h' },
-    { label: 'Weight', value: car.weightKg.toLocaleString('en-GB'), unit: 'kg' },
-    { label: 'Price when new', value: gbp.format(car.priceGbp), unit: '' },
+  const specs: [string, string][] = [
+    ['Year', String(car.year)],
+    ['Make', car.make],
+    ['Model', car.model],
+    ...(colour ? ([['Colour', colour]] as [string, string][]) : []),
+    ['Engine', car.engine],
+    ['Power', `${car.powerHp} hp`],
+    ['Torque', `${car.torqueNm} Nm`],
+  ]
+  const performance: [string, string][] = [
+    ['0 to 100 km/h', `${car.zeroTo100s} seconds`],
+    ['Top speed', `${car.topSpeedKmh} km/h (${mph(car.topSpeedKmh)} mph)`],
+    ['Weight', `${car.weightKg.toLocaleString('en-GB')} kg`],
+    ['Gearbox', car.transmission],
+    ['Drive', car.drivetrain === 'AWD' ? 'All-wheel drive' : 'Rear-wheel drive'],
+    ['Price when new', `About ${gbp.format(car.priceGbp)}`],
   ]
 
   return (
-    <div className="relative min-h-dvh overflow-hidden bg-ink">
-      {/* Make name as a watermark behind the stage, as the Mercedes reference does with its star */}
-      <div aria-hidden className="pointer-events-none absolute inset-x-0 top-[34vh] flex justify-center overflow-hidden md:top-[30vh]">
-        <span className="type-display text-[clamp(8rem,22vw,22rem)] leading-none whitespace-nowrap text-ivory/[0.03]">{car.make}</span>
-      </div>
-      <div aria-hidden className="absolute inset-x-0 top-0 h-[80vh] bg-[radial-gradient(70%_60%_at_50%_45%,rgba(58,155,138,0.16),transparent_70%)]" />
-
-      <div className="relative mx-auto max-w-[1440px] pb-dock px-4 pt-24 md:px-8 md:pt-28">
-        <Link to="/garage" className="-ml-2 inline-flex h-10 items-center gap-2 rounded-full px-2 text-label text-smoke transition-colors hover:text-ivory">
-          <ArrowLeft className="size-4" aria-hidden /> Back to garage
+    <div className="bg-obsidian text-white">
+      <div className="page-gutter mx-auto max-w-[1520px] pt-24 lg:pt-28">
+        <Link to={back.to} className="eyebrow inline-flex items-center gap-2 text-[10.5px] text-fog hover:text-white">
+          <ArrowLeft className="size-3.5" strokeWidth={1.5} /> {back.label}
         </Link>
-
-        <div className="mt-3 flex flex-wrap items-end justify-between gap-6">
-          <div className="min-w-0">
-            <p className="eyebrow">{entry ? 'Your collection' : 'Club register'}</p>
-            <h1 className="type-display mt-2 text-[clamp(2.5rem,5.5vw,4.75rem)] leading-[0.95] text-ivory">
+        <div className="mt-4 flex flex-wrap items-end justify-between gap-5">
+          <div>
+            <h1 className="display rise text-[clamp(2.4rem,5vw,4.4rem)]">
               {car.make} {car.model}
             </h1>
-            <p className="mt-3 text-lead text-smoke">
-              {car.year}, {car.engine}
+            <p className="rise mt-2 text-[13px] text-fog [animation-delay:80ms]">
+              {car.year}
+              {colour && <> · {colour}</>} · {entry ? (entry.shared ? 'Shared with the club' : 'Private collection') : 'Club register'}
             </p>
           </div>
           {entry ? (
-            <span className="inline-flex h-11 items-center gap-2 rounded-full border border-teal/40 bg-teal/10 px-5 text-label text-teal-bright">
-              <Check className="size-4" /> In your garage
-            </span>
+            <Link to="/garage" className="eyebrow inline-flex h-11 items-center gap-2.5 border border-white/50 px-5 text-[10.5px] font-semibold hover:bg-white hover:text-ink">
+              <Pencil className="size-3.5" strokeWidth={1.5} /> Edit vehicle
+            </Link>
           ) : (
-            <Button
-              variant="default"
-              disabled={isFull}
+            <button
+              type="button"
+              disabled={isFull || !ready}
               onClick={() => add(car.id)}
               title={isFull ? `Your garage holds ${GARAGE_LIMIT} cars. Remove one to make room.` : undefined}
+              className="eyebrow inline-flex h-11 items-center gap-2.5 border border-white/50 px-5 text-[10.5px] font-semibold hover:bg-white hover:text-ink disabled:opacity-40"
             >
-              <Plus /> {isFull ? 'Garage full' : 'Add to my garage'}
-            </Button>
+              <Plus className="size-3.5" strokeWidth={1.5} /> {isFull ? 'Garage full' : 'Add to my garage'}
+            </button>
           )}
         </div>
-
-        {/* Stage: modes, viewer, facts */}
-        <div className="mt-6 grid gap-5 lg:grid-cols-[minmax(0,1fr)_300px]">
-          <div className="relative">
-            <div className="relative h-[44vh] min-h-[300px] w-full md:h-[64vh]">
-              <CarViewer car={car} colour={colour} activeHotspot={hotspot} onHotspot={setHotspot} className="!absolute inset-0" />
-            </div>
-            <div role="group" aria-label="Features" className="mt-3 flex flex-wrap justify-center gap-2">
-              {car.hotspots.map((h) => (
-                <button
-                  key={h.id}
-                  type="button"
-                  aria-pressed={hotspot === h.id}
-                  onClick={() => setHotspot(hotspot === h.id ? null : h.id)}
-                  className={cn(
-                    'h-10 rounded-full border px-4 text-label transition-colors duration-200',
-                    hotspot === h.id ? 'border-teal bg-teal text-ink' : 'border-line-strong text-smoke hover:text-ivory',
-                  )}
-                >
-                  {h.label}
-                </button>
-              ))}
-            </div>
-            <p className="pointer-events-none mt-3 flex items-center justify-center gap-2 text-center text-caption text-smoke">
-              <Hand className="size-3.5" strokeWidth={1.75} aria-hidden />
-              Drag to walk around the car. Scroll or pinch to zoom.
-            </p>
-          </div>
-
-          <aside className="flex flex-col gap-4 lg:pt-10">
-            <div className="rounded-[24px] bg-ivory p-6 text-ink">
-              <p className="text-caption font-medium text-ink/70">{active ? 'Up close' : 'Did you know'}</p>
-              <h2 className="type-display mt-2 text-[26px] leading-tight">{active ? active.label : car.tagline}</h2>
-              <p className="mt-3 text-label leading-relaxed text-ink/80">{active ? active.detail : car.facts[factIndex]}</p>
-              {!active && (
-                <div className="mt-5 flex items-center justify-between">
-                  <span className="type-spec text-caption text-ink/65">
-                    {factIndex + 1} of {car.facts.length}
-                  </span>
-                  <div className="flex gap-1.5">
-                    <button
-                      type="button"
-                      aria-label="Previous fact"
-                      onClick={() => setFactIndex((i) => (i - 1 + car.facts.length) % car.facts.length)}
-                      className="flex size-10 items-center justify-center rounded-full border border-ink/15 hover:bg-ink/5"
-                    >
-                      <ChevronLeft className="size-4" />
-                    </button>
-                    <button
-                      type="button"
-                      aria-label="Next fact"
-                      onClick={() => setFactIndex((i) => (i + 1) % car.facts.length)}
-                      className="flex size-10 items-center justify-center rounded-full border border-ink/15 hover:bg-ink/5"
-                    >
-                      <ChevronRight className="size-4" />
-                    </button>
-                  </div>
-                </div>
-              )}
-              {active && (
-                <button type="button" onClick={() => setHotspot(null)} className="mt-5 h-10 text-label font-medium underline underline-offset-4">
-                  Back to facts
-                </button>
-              )}
-            </div>
-
-            <div className="panel p-5">
-              <p className="text-caption text-smoke">Engine</p>
-              <p className="mt-1 text-ivory">{car.engine}</p>
-              <p className="mt-3 text-caption text-smoke">Gearbox and drive</p>
-              <p className="mt-1 text-ivory">
-                {car.transmission}, {car.drivetrain}
-              </p>
-            </div>
-          </aside>
-        </div>
-
-        {/* Specifications, grouped; the garage's "View details" lands here */}
-        <section id="details" aria-labelledby="highlights" className="mt-12 scroll-mt-28">
-          <div className="mb-5 flex flex-wrap items-center justify-between gap-4">
-            <h2 id="highlights" className="type-display text-[clamp(2rem,3.4vw,2.75rem)] text-ivory">
-              Performance
-            </h2>
-            <div className="flex items-center gap-3" role="radiogroup" aria-label="Paint colour">
-              <span className="text-sm text-smoke">{car.colours.find((c) => c.hex === colour)?.name ?? 'Colour'}</span>
-              {car.colours.map((c) => (
-                <button
-                  key={c.hex}
-                  type="button"
-                  role="radio"
-                  aria-checked={colour === c.hex}
-                  aria-label={c.name}
-                  title={c.name}
-                  onClick={() => pickColour(c.hex)}
-                  className={cn(
-                    'size-7 rounded-full ring-offset-2 ring-offset-ink transition-shadow',
-                    colour === c.hex ? 'ring-2 ring-ivory' : 'ring-1 ring-white/20 hover:ring-white/50',
-                  )}
-                  style={{ background: c.hex }}
-                />
-              ))}
-            </div>
-          </div>
-          <ul className="-mx-4 flex snap-x gap-3 overflow-x-auto px-4 pb-2 [scrollbar-width:none] md:mx-0 md:grid md:grid-cols-3 md:px-0 xl:grid-cols-6 [&::-webkit-scrollbar]:hidden">
-            {tiles.map((t) => (
-              <li key={t.label} className="tile min-w-[160px] shrink-0 snap-start p-5">
-                <p className="text-caption text-smoke">{t.label}</p>
-                <p className="mt-6 flex items-baseline gap-1.5">
-                  <span className="type-spec text-[30px] leading-none text-ivory">{t.value}</span>
-                  {t.unit && <span className="text-caption text-smoke">{t.unit}</span>}
-                </p>
-              </li>
-            ))}
-          </ul>
-        </section>
-
-        {/* All ten facts */}
-        <section aria-labelledby="facts" className="relative mt-16 grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
-          <Piston className="pointer-events-none absolute -bottom-10 -left-10 hidden size-64 text-champagne opacity-[0.1] lg:block" />
-          <h2 id="facts" className="type-display text-[clamp(2rem,3.4vw,2.75rem)] text-ivory">
-            Ten things to know about the {car.model}
-          </h2>
-          <ol className="grid gap-x-10 gap-y-6 sm:grid-cols-2">
-            {car.facts.map((f, i) => (
-              <li key={f} className="flex gap-4 border-t border-line pt-4">
-                <span className="type-spec text-caption text-champagne">{String(i + 1).padStart(2, '0')}</span>
-                <p className="leading-relaxed text-ivory/90">{f}</p>
-              </li>
-            ))}
-          </ol>
-        </section>
-
-        <p className="mt-16 max-w-3xl text-caption text-smoke">
-          {car.id === 'ferrari-458-italia'
-            ? 'Ferrari 458 model by vicent091036 on Sketchfab, as distributed with the three.js examples.'
-            : 'Stylised model built from the car’s published dimensions. Figures are manufacturer claims and may vary by market.'}
-        </p>
       </div>
+
+      <div className="mx-auto mt-6 max-w-[1520px] lg:px-[max(40px,env(safe-area-inset-left,0px))]">
+        <SketchfabStage car={car} />
+        <div className="page-gutter lg:px-0">{model && <SketchfabCredit model={model} className="mt-3" />}</div>
+      </div>
+
+      {/* Other cars in the showroom, as the catalogue's thumbnail strip */}
+      <nav aria-label="More cars in the showroom" className="page-gutter mx-auto mt-8 max-w-[1520px]">
+        <ul className="-mx-1 flex snap-x gap-2 overflow-x-auto px-1 pb-2">
+          {others.map((c) => {
+            const img = carImage(c.id, 'dark')
+            return (
+              <li key={c.id} className="shrink-0 snap-start">
+                <Link to={`/cars/${c.id}`} className="group block w-36 lg:w-40" title={`${c.make} ${c.model}`}>
+                  <img src={img.srcSet.split(' ')[0]} alt="" loading="lazy" className="aspect-[16/10] w-full border border-obsidian-line object-cover opacity-70 transition-opacity group-hover:opacity-100" />
+                  <span className="mt-1.5 block truncate text-[11px] text-fog group-hover:text-white">
+                    {c.make} {c.model}
+                  </span>
+                </Link>
+              </li>
+            )
+          })}
+        </ul>
+      </nav>
+
+      <section className="mt-10 border-t border-obsidian-line">
+        <div className="page-gutter mx-auto max-w-[1520px]">
+          <div role="tablist" aria-label="Vehicle details" className="-mx-1 flex gap-8 overflow-x-auto px-1">
+            {TABS.map((t) => (
+              <button
+                key={t}
+                id={`tab-${t}`}
+                type="button"
+                role="tab"
+                aria-selected={tab === t}
+                aria-controls={`panel-${t}`}
+                onClick={() => setTab(t)}
+                className={cn(
+                  'eyebrow relative shrink-0 py-5 text-[10.5px] transition-colors',
+                  tab === t ? 'text-white after:absolute after:inset-x-0 after:top-0 after:h-0.5 after:bg-white' : 'text-fog hover:text-white',
+                )}
+              >
+                {t === 'Service' ? 'Service history' : t}
+              </button>
+            ))}
+          </div>
+
+          <div id={`panel-${tab}`} role="tabpanel" aria-labelledby={`tab-${tab}`} className="pt-4 pb-24">
+            {tab === 'Specifications' && (
+              <div className="grid gap-x-16 gap-y-2 md:grid-cols-2">
+                <Rows rows={specs} />
+                <Rows rows={performance} />
+                <p className="text-[12px] text-fog md:col-span-2">Figures are the manufacturer&rsquo;s published numbers and approximate prices; check them before relying on them.</p>
+              </div>
+            )}
+
+            {tab === 'Overview' && (
+              <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+                <div>
+                  <p className="display text-[clamp(1.6rem,2.6vw,2.2rem)] leading-snug">{car.tagline}.</p>
+                  <ul className="mt-8 space-y-4">
+                    {car.facts.slice(0, 6).map((f) => (
+                      <li key={f} className="border-t border-obsidian-line pt-4 text-[14px] leading-relaxed text-white/85">
+                        {f}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div>
+                  <p className="eyebrow text-fog">What to look for</p>
+                  <dl className="mt-4 divide-y divide-obsidian-line border-y border-obsidian-line">
+                    {car.hotspots.map((h) => (
+                      <div key={h.id} className="py-4">
+                        <dt className="text-[15px] font-medium">{h.label}</dt>
+                        <dd className="mt-1 text-[13px] leading-relaxed text-fog">{h.detail}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                </div>
+              </div>
+            )}
+
+            {tab === 'Service' && (
+              <div className="grid gap-x-16 gap-y-6 md:grid-cols-2">
+                <Rows
+                  rows={[
+                    ['Manufacturer interval', `Every ${car.serviceIntervalMonths} months or ${car.serviceIntervalKm.toLocaleString('en-GB')} km`],
+                    ...(entry
+                      ? ([
+                          ['Last service', fmtDate(new Date(entry.lastService))],
+                          ['Next service due', fmtDate(nextServiceDate(entry, car))],
+                          ['Mileage', `${entry.mileageKm.toLocaleString('en-GB')} km`],
+                        ] as [string, string][])
+                      : []),
+                  ]}
+                />
+                <div className="text-[14px] leading-relaxed text-fog">
+                  {entry ? (
+                    <p>
+                      The next service date is worked out from your last service and the manufacturer&rsquo;s interval. Update them from{' '}
+                      <Link to="/garage" className="text-white underline underline-offset-4">
+                        your garage
+                      </Link>
+                      . Workshop records are not connected yet.
+                    </p>
+                  ) : (
+                    <p>Add this car to your garage to track its mileage and service dates.</p>
+                  )}
+                  <p className="mt-3 inline-flex items-center gap-2 text-[12px]">
+                    <Check className="size-3.5" /> Intervals vary by market; your dealer&rsquo;s schedule takes precedence.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {tab === 'Media' && model && (
+              <div className="grid gap-10 md:grid-cols-2">
+                <Rows
+                  rows={[
+                    ['3D model', model.title],
+                    ['Creator', model.author],
+                    ['Licence', model.license],
+                    ['Hosted by', 'Sketchfab'],
+                  ]}
+                />
+                <div className="text-[14px] leading-relaxed text-fog">
+                  <p>
+                    The 3D view is the creator&rsquo;s model, hosted on Sketchfab and loaded only when you choose Explore in 3D. The studio still is cut from the same model&rsquo;s preview.
+                  </p>
+                  <a href={modelPageUrl(model)} target="_blank" rel="noreferrer" className="eyebrow mt-5 inline-flex h-11 items-center border border-white/50 px-5 text-[10.5px] font-semibold text-white hover:bg-white hover:text-ink">
+                    View on Sketchfab
+                  </a>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
     </div>
   )
 }
