@@ -6,7 +6,7 @@ import { DemoNote, Eyebrow, Photo, Reveal } from '@/components/site/primitives'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { cars, type Car } from '@/data/cars'
-import { members } from '@/data/members'
+import { members, shows } from '@/data/members'
 import { carImage } from '@/data/showroom'
 import { useAuth } from '@/lib/auth'
 import { GARAGE_LIMIT, nextServiceDate, useGarage, type GarageEntry } from '@/lib/garage'
@@ -335,7 +335,7 @@ function Collection() {
 
   const items = useMemo<CollectionItem[]>(() => {
     const shared = garageCars.filter((g) => g.entry.shared).map((g) => ({ car: g.car, owner: member?.name ?? 'You', colour: g.entry.colour, yours: true }))
-    const others = members.flatMap((m) =>
+    const others = members.filter((m) => shows(m, 'cars')).flatMap((m) =>
       m.carIds.flatMap((id) => {
         const car = cars.find((c) => c.id === id)
         return car ? [{ car, owner: m.name, colour: m.carColours[id] ?? car.colours[0].hex }] : []

@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom'
 import { Avatar, DemoNote, Eyebrow, Reveal } from '@/components/site/primitives'
 import { Input } from '@/components/ui/input'
 import { cars } from '@/data/cars'
-import { members, type ClubMember } from '@/data/members'
+import { members, shows, type ClubMember } from '@/data/members'
 import { carImage } from '@/data/showroom'
 import { cn } from '@/lib/utils'
 
@@ -13,7 +13,7 @@ const TIERS = ['All', 'Founder', 'Patron', 'Member'] as const
 const since = (iso: string) => new Date(iso).toLocaleDateString('en-GB', { month: 'long', year: 'numeric', timeZone: 'UTC' })
 
 function MemberEntry({ member }: { member: ClubMember }) {
-  const owned = member.carIds.flatMap((id) => cars.filter((c) => c.id === id))
+  const owned = shows(member, 'cars') ? member.carIds.flatMap((id) => cars.filter((c) => c.id === id)) : []
   return (
     <article id={member.id} className="flex scroll-mt-28 flex-col border-t border-ink/80 pt-5">
       <div className="flex items-start gap-4">
@@ -21,11 +21,12 @@ function MemberEntry({ member }: { member: ClubMember }) {
         <div className="min-w-0">
           <h2 className="display text-[24px] leading-tight">{member.name}</h2>
           <p className="eyebrow mt-1 text-[10px] text-stone">
-            {member.tier} · {member.city}
+            {member.tier}
+            {shows(member, 'city') && <> · {member.city}</>}
           </p>
         </div>
       </div>
-      <p className="mt-4 text-[14px] leading-relaxed text-ink/80">{member.bio}</p>
+      {shows(member, 'bio') && <p className="mt-4 text-[14px] leading-relaxed text-ink/80">{member.bio}</p>}
       <dl className="mt-4 grid grid-cols-2 border-y border-line text-[12px]">
         <div className="py-2.5">
           <dt className="eyebrow text-[9.5px] text-stone">Member since</dt>
@@ -33,7 +34,7 @@ function MemberEntry({ member }: { member: ClubMember }) {
         </div>
         <div className="border-l border-line py-2.5 pl-3">
           <dt className="eyebrow text-[9.5px] text-stone">Drives</dt>
-          <dd className="mt-1 tabular">{member.drivesAttended}</dd>
+          <dd className="mt-1 tabular">{shows(member, 'drives') ? member.drivesAttended : 'Private'}</dd>
         </div>
       </dl>
       <ul className="mt-4 grid gap-2">
