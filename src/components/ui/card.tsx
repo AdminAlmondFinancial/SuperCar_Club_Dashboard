@@ -2,8 +2,15 @@ import * as React from 'react'
 
 import { cn } from '@/lib/utils'
 
-function Card({ className, feature, ...props }: React.ComponentProps<'div'> & { feature?: boolean }) {
-  return <div data-slot="card" className={cn(feature ? 'panel-feature' : 'panel', 'p-6', className)} {...props} />
+const cardVariant = {
+  standard: 'panel p-6',
+  featured: 'panel-feature p-6 md:p-8',
+  compact: 'tile p-4',
+  interactive: 'panel interactive p-6',
+} as const
+
+function Card({ className, variant = 'standard', ...props }: React.ComponentProps<'div'> & { variant?: keyof typeof cardVariant }) {
+  return <div data-slot="card" className={cn(cardVariant[variant], className)} {...props} />
 }
 
 function CardHeader({ className, ...props }: React.ComponentProps<'div'>) {
@@ -15,7 +22,7 @@ function CardTitle({ className, ...props }: React.ComponentProps<'h2'>) {
 }
 
 function CardDescription({ className, ...props }: React.ComponentProps<'p'>) {
-  return <p data-slot="card-description" className={cn('text-sm text-smoke', className)} {...props} />
+  return <p data-slot="card-description" className={cn('text-label text-smoke', className)} {...props} />
 }
 
 export { Card, CardHeader, CardTitle, CardDescription }

@@ -4,10 +4,12 @@ import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 
 import { Wordmark } from '@/components/layout/crest'
 import { useAuth } from '@/lib/auth'
+import { daysUntilDate } from '@/lib/dates'
+import { nextServiceDate, useGarage } from '@/lib/garage'
 import { cn } from '@/lib/utils'
 
 export const NAV = [
-  { to: '/', label: 'Overview', icon: House, end: true },
+  { to: '/', label: 'Home', icon: House, end: true },
   { to: '/garage', label: 'Garage', icon: CarFront },
   { to: '/events', label: 'Events', icon: CalendarDays },
   { to: '/members', label: 'Members', icon: Users },
@@ -23,7 +25,10 @@ function initials(name: string) {
 
 export function AppShell() {
   const { member, signOut } = useAuth()
+  const { garageCars } = useGarage()
   const navigate = useNavigate()
+  // The bell only shows a dot when a car's service is overdue or due within a month.
+  const serviceDue = garageCars.some(({ entry, car }) => daysUntilDate(nextServiceDate(entry, car)) <= 30)
   const [scrolled, setScrolled] = useState(false)
   const { pathname, hash } = useLocation()
 
@@ -48,12 +53,12 @@ export function AppShell() {
     <div className="min-h-dvh bg-ink">
       <header
         className={cn(
-          'fixed inset-x-0 top-0 z-50 border-b transition-[background-color,border-color] duration-500',
+          'fixed inset-x-0 top-0 z-50 border-b transition-[background-color,border-color] duration-300',
           scrolled ? 'border-line bg-black/75 backdrop-blur-xl' : 'border-transparent',
         )}
       >
         <div className="mx-auto flex h-20 max-w-[1440px] items-center justify-between gap-4 px-4 md:px-8">
-          <NavLink to="/" aria-label="SuperCar Club overview">
+          <NavLink to="/" aria-label="SuperCar Club home">
             <Wordmark />
           </NavLink>
 
@@ -69,7 +74,7 @@ export function AppShell() {
                 end={'end' in rest}
                 className={({ isActive }) =>
                   cn(
-                    'flex h-10 items-center gap-2 rounded-full px-4 text-[13px] font-medium transition-colors duration-300',
+                    'flex h-10 items-center gap-2 rounded-full px-4 text-label font-medium transition-colors duration-200',
                     isActive ? 'bg-ivory text-ink' : 'text-smoke hover:text-ivory',
                   )
                 }
@@ -93,10 +98,10 @@ export function AppShell() {
               type="button"
               onClick={() => navigate('/#service')}
               className="relative flex size-10 items-center justify-center rounded-full border border-line bg-black/55 text-smoke backdrop-blur-xl transition-colors hover:text-ivory"
-              aria-label="Notifications"
+              aria-label={serviceDue ? 'Service reminders, a service is due soon' : 'Service reminders'}
             >
               <Bell className="size-4" strokeWidth={1.75} />
-              <span className="absolute top-2.5 right-2.5 size-1.5 rounded-full bg-teal-bright" />
+              {serviceDue && <span className="absolute top-2.5 right-2.5 size-1.5 rounded-full bg-champagne" aria-hidden />}
             </button>
             {member && (
               <div className="group relative">
@@ -128,25 +133,25 @@ export function AppShell() {
         <Outlet />
       </main>
 
-      {/* Floating pill dock on small screens, after the nav-bar reference */}
+      {/* Floating pill dock on small screens, after the nav-bar reference; it sits above the phone's home indicator */}
       <nav
         aria-label="Main"
-        className="fixed inset-x-0 bottom-4 z-50 mx-auto flex w-fit items-center gap-1 rounded-full border border-line bg-black/70 p-1.5 shadow-[0_12px_40px_rgba(0,0,0,0.6)] backdrop-blur-xl md:hidden"
+        className="fixed inset-x-0 bottom-[calc(0.75rem+env(safe-area-inset-bottom))] z-50 mx-auto flex w-fit items-center gap-1 rounded-full border border-line bg-black/80 p-1.5 shadow-[0_12px_40px_rgba(0,0,0,0.6)] backdrop-blur-xl md:hidden"
       >
         {NAV.map(({ to, label, icon: Icon, ...rest }) => (
           <NavLink
             key={to}
             to={to}
             end={'end' in rest}
-            aria-label={label}
             className={({ isActive }) =>
               cn(
-                'flex size-12 items-center justify-center rounded-full transition-colors',
-                isActive ? 'bg-ivory text-ink' : 'text-smoke',
+                'flex h-14 w-[4.25rem] flex-col items-center justify-center gap-0.5 rounded-full text-[11px] leading-none font-medium transition-colors duration-200',
+                isActive ? 'bg-ivory text-ink' : 'text-smoke hover:text-ivory',
               )
             }
           >
-            <Icon className="size-5" strokeWidth={1.75} />
+            <Icon className="size-5" strokeWidth={1.75} aria-hidden />
+            {label}
           </NavLink>
         ))}
       </nav>

@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { Wrench } from 'lucide-react'
 
 import { Badge } from '@/components/ui/badge'
+import { SectionHeader } from '@/components/ui/section-header'
 import { nextServiceDate, useGarage } from '@/lib/garage'
 import { daysUntilDate, DAY_MS, fmtDay } from './dates'
 
@@ -10,9 +11,7 @@ export function ServiceReminders() {
   const now = new Date()
   return (
     <section id="service" aria-labelledby="service-title" className="scroll-mt-28">
-      <h2 id="service-title" className="type-display mb-6 text-3xl text-ivory md:text-4xl">
-        Service reminders
-      </h2>
+      <SectionHeader id="service-title" title="Service reminders" />
       {garageCars.length === 0 ? (
         <div className="panel p-6 sm:p-8">
           <Wrench className="size-6 text-champagne" aria-hidden />
@@ -38,7 +37,7 @@ export function ServiceReminders() {
                     <p className="truncate text-ivory">
                       {car.make} {car.model}
                     </p>
-                    <p className="mt-0.5 text-sm text-smoke">Next service {fmtDay(due)}</p>
+                    <p className="mt-0.5 text-label text-smoke">Next service {fmtDay(due)}</p>
                   </div>
                   <Badge variant={overdue ? 'signal' : soon ? 'champagne' : 'accent'}>
                     {overdue ? 'Overdue' : soon ? 'Due soon' : 'On schedule'}
@@ -57,7 +56,7 @@ export function ServiceReminders() {
                     style={{ width: `${progress * 100}%` }}
                   />
                 </div>
-                <p className="mt-2 text-sm text-smoke">
+                <p className="mt-2 text-label text-smoke">
                   {overdue ? (
                     <><span className="type-spec text-ivory">{-days}</span> days past due</>
                   ) : (

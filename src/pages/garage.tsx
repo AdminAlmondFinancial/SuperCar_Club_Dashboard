@@ -6,6 +6,7 @@ import { CarRender } from '@/components/car-render'
 import { Tyre } from '@/components/memorabilia'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { EmptyState } from '@/components/ui/empty-state'
 import { Input } from '@/components/ui/input'
 import { cars, type Car } from '@/data/cars'
 import { GARAGE_LIMIT, nextServiceDate, useGarage, type GarageEntry } from '@/lib/garage'
@@ -27,38 +28,43 @@ function Bay({ entry, car, onRemove }: { entry: GarageEntry; car: Car; onRemove:
   const next = nextServiceDate(entry, car)
   const colourName = car.colours.find((c) => c.hex === entry.colour)?.name ?? car.colours[0].name
   return (
-    <article className="panel-feature relative flex flex-col overflow-hidden">
+    <article className="panel-feature relative flex flex-col overflow-hidden" aria-labelledby={`bay-${car.id}`}>
       <div className="flex items-start justify-between gap-4 p-6 pb-0 md:p-8 md:pb-0">
-        <div>
-          <p className="text-sm text-smoke">{car.make}</p>
-          <h2 className="type-display mt-1 text-[clamp(2rem,3.4vw,2.75rem)] text-ivory">{car.model}</h2>
-          <p className="mt-2 flex items-center gap-2 text-sm text-smoke">
-            <span className="size-2.5 rounded-full ring-1 ring-white/20" style={{ background: entry.colour }} />
-            {colourName}
+        <div className="min-w-0">
+          <p className="eyebrow">In your garage</p>
+          <h2 id={`bay-${car.id}`} className="type-display mt-2 text-[clamp(2rem,3.4vw,2.75rem)] leading-tight text-ivory">
+            {car.make} {car.model}
+          </h2>
+          <p className="mt-2 flex items-center gap-2 text-label text-smoke">
+            <span className="size-2.5 shrink-0 rounded-full ring-1 ring-white/20" style={{ background: entry.colour }} aria-hidden />
+            {colourName}, {car.year}
           </p>
         </div>
-        <Button variant="ghost" size="icon" onClick={onRemove} aria-label={`Remove the ${car.make} ${car.model} from your garage`}>
+        <Button variant="ghost" size="icon" onClick={onRemove} aria-label={`Remove the ${car.make} ${car.model} from your garage`} title="Remove from garage">
           <X />
         </Button>
       </div>
-      <Link to={`/cars/${car.id}`} className="group relative block px-4 md:px-8" aria-label={`Open the ${car.make} ${car.model} in 3D`}>
-        <CarRender car={car} className="mx-auto h-48 w-full transition-transform duration-700 ease-(--ease-luxe) group-hover:scale-[1.03] md:h-60" />
+      <Link to={`/cars/${car.id}`} className="group relative block px-4 py-2 md:px-8" aria-label={`Open the ${car.make} ${car.model} in 3D`}>
+        <CarRender car={car} className="mx-auto h-52 w-full transition-transform duration-700 ease-(--ease-luxe) group-hover:scale-[1.03] md:h-64" />
       </Link>
-      <div className="mt-auto grid grid-cols-3 gap-px border-t border-line bg-line">
+      <dl className="mx-5 mt-auto grid grid-cols-3 gap-3 border-t border-line pt-5 md:mx-8" aria-label="Ownership">
         {[
           ['Mileage', `${entry.mileageKm.toLocaleString('en-GB')} km`],
           ['Next service', fmtDate(next)],
-          ['In the club since', fmtDate(new Date(entry.acquired))],
+          ['Joined the club', fmtDate(new Date(entry.acquired))],
         ].map(([k, v]) => (
-          <div key={k} className="bg-[#08120f] px-5 py-4">
-            <p className="text-xs text-smoke">{k}</p>
-            <p className="mt-1 text-sm text-ivory">{v}</p>
+          <div key={k} className="min-w-0">
+            <dt className="text-caption text-smoke">{k}</dt>
+            <dd className="type-spec mt-1 text-label text-ivory">{v}</dd>
           </div>
         ))}
-      </div>
-      <div className="flex gap-3 p-5 md:px-8">
-        <Button asChild variant="accent" className="flex-1">
+      </dl>
+      <div className="flex flex-col gap-3 p-5 sm:flex-row md:px-8 md:pb-8">
+        <Button asChild variant="accent" className="sm:flex-1">
           <Link to={`/cars/${car.id}`}>Open in 3D</Link>
+        </Button>
+        <Button asChild variant="outline" className="sm:flex-1">
+          <Link to={`/cars/${car.id}#details`}>View details</Link>
         </Button>
       </div>
     </article>
@@ -77,7 +83,7 @@ function EmptyBay({ onFind }: { onFind: () => void }) {
         <Plus className="size-6" strokeWidth={1.5} />
       </span>
       <span className="type-display text-2xl text-ivory">This bay is free</span>
-      <span className="max-w-[30ch] text-sm text-smoke">Find your car in the register below and add it to your garage.</span>
+      <span className="max-w-[30ch] text-label text-smoke">Find your car in the register below and add it to your garage.</span>
     </button>
   )
 }
@@ -86,7 +92,7 @@ function Spec({ icon: Icon, value, label }: { icon: typeof Gauge; value: string;
   return (
     <span className="flex items-center gap-1.5 text-smoke" title={label}>
       <Icon className="size-3.5" strokeWidth={1.75} aria-hidden />
-      <span className="type-spec text-[12px] text-ivory/90">{value}</span>
+      <span className="type-spec text-caption text-ivory">{value}</span>
       <span className="sr-only">{label}</span>
     </span>
   )
@@ -96,13 +102,13 @@ function RegisterCard({ car }: { car: Car }) {
   const { entries, isFull, add } = useGarage()
   const owned = entries.some((e) => e.carId === car.id)
   return (
-    <li className="panel group flex flex-col overflow-hidden transition-colors hover:border-line-strong">
+    <li className="panel interactive group flex flex-col overflow-hidden">
       <Link to={`/cars/${car.id}`} className="flex flex-1 flex-col">
         <div className="flex items-start justify-between gap-3 px-5 pt-5">
           <div>
-            <p className="text-[13px] text-smoke">{car.make}</p>
-            <h3 className="type-display mt-1 text-[30px] text-ivory">{car.model}</h3>
-            <p className="mt-1.5 text-[13px] text-smoke">
+            <p className="text-caption text-smoke">{car.make}</p>
+            <h3 className="type-display mt-1 text-[30px] leading-tight text-ivory">{car.model}</h3>
+            <p className="mt-1.5 text-caption text-smoke">
               {car.year}, {car.engine}
             </p>
           </div>
@@ -166,17 +172,16 @@ export default function GaragePage() {
 
   return (
     <div className="field-verde min-h-dvh">
-      <div className="mx-auto max-w-[1440px] px-4 pt-28 pb-32 md:px-8 md:pt-32">
+      <div className="mx-auto max-w-[1440px] pb-dock px-4 pt-28 md:px-8 md:pt-32">
         <header className="mb-10 flex flex-wrap items-end justify-between gap-6">
           <div>
             <h1 className="type-display text-[clamp(2.75rem,6vw,5rem)] text-ivory">Your garage</h1>
-            <p className="mt-3 max-w-[56ch] text-[17px] text-pretty text-smoke">
-              Keep up to two cars here. Open one to walk all the way around it in 3D.
+            <p className="mt-3 max-w-[56ch] text-lead text-pretty text-smoke">
+              {garageCars.length === 0
+                ? 'Add the cars you drive to the club, up to two. Open one to walk all the way around it in 3D.'
+                : 'Your cars, ready to explore in 3D. You can keep up to two here.'}
             </p>
           </div>
-          <p className="type-spec text-sm text-smoke">
-            {garageCars.length} of {GARAGE_LIMIT} bays in use
-          </p>
         </header>
 
         <section aria-label="Your cars" className="grid gap-5 lg:grid-cols-2">
@@ -218,7 +223,7 @@ export default function GaragePage() {
                 aria-checked={filter === f.key}
                 onClick={() => setFilter(f.key)}
                 className={cn(
-                  'h-9 shrink-0 rounded-full px-4 text-[13px] font-medium transition-colors',
+                  'h-10 shrink-0 rounded-full px-4 text-label font-medium transition-colors duration-200',
                   filter === f.key ? 'bg-ivory text-ink' : 'text-smoke hover:text-ivory',
                 )}
               >
@@ -234,20 +239,23 @@ export default function GaragePage() {
               ))}
             </ul>
           ) : (
-            <div className="tile px-6 py-14 text-center">
-              <p className="type-display text-2xl text-ivory">No cars match &ldquo;{query}&rdquo;</p>
-              <p className="mt-2 text-smoke">Try a make such as Ferrari, or an engine such as V12.</p>
-              <Button
-                variant="outline"
-                className="mt-6"
-                onClick={() => {
-                  setQuery('')
-                  setFilter('all')
-                }}
-              >
-                Clear search
-              </Button>
-            </div>
+            <EmptyState
+              icon={<Search />}
+              title={query ? `No cars match \u201c${query}\u201d` : 'No cars of this kind yet'}
+              action={
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setQuery('')
+                    setFilter('all')
+                  }}
+                >
+                  Clear search
+                </Button>
+              }
+            >
+              Try a make such as Ferrari, or an engine such as V12.
+            </EmptyState>
           )}
         </section>
       </div>

@@ -1,10 +1,11 @@
-import { ShieldCheck } from 'lucide-react'
+import { Loader2, ShieldCheck } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import { Navigate, useSearchParams } from 'react-router-dom'
 
-import { Wordmark } from '@/components/layout/crest'
+import { Crest, Wordmark } from '@/components/layout/crest'
 import { Button } from '@/components/ui/button'
 import { asset } from '@/lib/asset'
-import { useAuth } from '@/lib/auth'
+import { useAuth, type Provider } from '@/lib/auth'
 
 function GoogleGlyph() {
   return (
@@ -42,45 +43,69 @@ export function SignInPage() {
   const { member, loading, previewMode, signIn, signInPreview } = useAuth()
   const [params] = useSearchParams()
   const error = params.get('error')
+  // The provider page takes a moment to open, so the chosen button says so and both are held.
+  const [pending, setPending] = useState<Provider | null>(null)
+  // Coming back from the provider with the browser's back button restores this page as it was left.
+  useEffect(() => {
+    const reset = () => setPending(null)
+    window.addEventListener('pageshow', reset)
+    return () => window.removeEventListener('pageshow', reset)
+  }, [])
   if (!loading && member) return <Navigate to="/" replace />
+
+  const go = (provider: Provider) => {
+    setPending(provider)
+    signIn(provider)
+  }
 
   return (
     <div className="field-verde relative grid min-h-dvh overflow-hidden lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)]">
+      {/* The crest as a faint watermark, so the dark field is not empty on phones */}
+      <Crest className="pointer-events-none absolute -right-24 bottom-[-6rem] h-[30rem] w-[27rem] opacity-[0.05] lg:hidden" />
       <section className="relative z-10 flex flex-col justify-between px-6 py-8 md:px-14 md:py-12">
         <Wordmark />
 
-        <div className="max-w-[440px] py-16">
-          <h1 className="type-display text-[clamp(3rem,6vw,5.25rem)] text-ivory">Your keys, please.</h1>
-          <p className="mt-6 max-w-[38ch] text-[17px] leading-relaxed text-smoke">
+        <div className="enter max-w-[440px] py-16">
+          <p className="eyebrow">Members only</p>
+          <h1 className="type-display mt-4 text-[clamp(3rem,6vw,5.25rem)] text-ivory">Your keys, please.</h1>
+          <p className="mt-5 max-w-[38ch] text-lead leading-relaxed text-smoke">
             Sign in to see your garage, the season&rsquo;s drives and what everyone else is bringing to the next meet.
           </p>
 
           {error && (
-            <p role="alert" className="mt-8 rounded-[18px] border border-signal/40 bg-signal/10 px-4 py-3 text-sm text-ivory">
+            <p role="alert" className="mt-8 rounded-[18px] border border-signal/40 bg-signal/10 px-4 py-3 text-label text-ivory">
               {ERRORS[error] ?? ERRORS.invalid_request}
             </p>
           )}
 
           <div className="mt-10 flex flex-col gap-3">
-            <Button size="lg" variant="default" onClick={() => signIn('google')} className="justify-start pl-5">
-              <GoogleGlyph />
-              Continue with Google
+            <Button size="lg" variant="default" onClick={() => go('google')} disabled={!!pending} aria-busy={pending === 'google'} className="justify-start pl-5">
+              {pending === 'google' ? <Loader2 className="animate-spin" /> : <GoogleGlyph />}
+              {pending === 'google' ? 'Opening Google' : 'Continue with Google'}
             </Button>
-            <Button size="lg" variant="outline" onClick={() => signIn('microsoft')} className="justify-start pl-5">
-              <MicrosoftGlyph />
-              Continue with Microsoft
+            <Button size="lg" variant="outline" onClick={() => go('microsoft')} disabled={!!pending} aria-busy={pending === 'microsoft'} className="justify-start pl-5">
+              {pending === 'microsoft' ? <Loader2 className="animate-spin" /> : <MicrosoftGlyph />}
+              {pending === 'microsoft' ? 'Opening Microsoft' : 'Continue with Microsoft'}
             </Button>
-            {previewMode && (
-              <Button size="lg" variant="link" onClick={() => signInPreview()} className="justify-start px-0">
-                Preview the dashboard without signing in
-              </Button>
-            )}
           </div>
+
+          {previewMode && (
+            <div className="mt-8 border-t border-line pt-6">
+              <button
+                type="button"
+                onClick={() => signInPreview()}
+                className="text-label font-medium text-teal-bright underline-offset-4 hover:underline"
+              >
+                Look around with sample data
+              </button>
+              <p className="mt-1.5 text-caption text-smoke">A demo of the dashboard. The members, events and cars are examples, and nothing is sent to the club.</p>
+            </div>
+          )}
         </div>
 
-        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-[13px] text-smoke">
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-caption text-smoke">
           <span>Membership is by invitation.</span>
-          <a href="/admin" className="inline-flex items-center gap-1.5 hover:text-ivory">
+          <a href="/admin" className="inline-flex min-h-10 items-center gap-1.5 hover:text-ivory">
             <ShieldCheck className="size-4" strokeWidth={1.75} />
             Club admin sign-in
           </a>
